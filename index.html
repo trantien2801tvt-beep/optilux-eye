@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptiLux Eyewear - Cửa Hàng Kính Mắt Cao Cấp</title>
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f8f9fa; }
+        .product-card { transition: all 0.25s ease; border-radius: 12px; overflow: hidden; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; }
+        .product-img { height: 210px; object-fit: cover; }
+        .cursor-pointer { cursor: pointer; }
+        .auth-card { max-width: 460px; border-radius: 14px; }
+        .switcher-bar { background-color: #111827; color: #9ca3af; padding: 7px 0; font-size: 0.85rem; }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- THANH THÔNG TIN TÀI KHOẢN MẪU ĐỂ TEST -->
+    <div class="switcher-bar border-bottom border-secondary">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span>
+                <i class="bi bi-info-circle-fill text-warning me-1"></i>
+                Tài khoản test: <strong>admin@optilux.vn</strong> (Admin, mk: <code>admin123</code>) | <strong>customer@gmail.com</strong> (Khách, mk: <code>123456</code>)
+            </span>
+            <span id="roleIndicator" class="badge bg-secondary">Chưa đăng nhập</span>
+        </div>
+    </div>
+
+    <!-- NAVBAR CHÍNH -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container">
+            <a id="brandLogo" class="navbar-brand fw-bold text-warning fs-4" href="javascript:void(0)" onclick="navTo('home')">
+                <i class="bi bi-eyeglasses me-2"></i>OptiLux
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a id="navHome" class="nav-link cursor-pointer" onclick="navTo('home')">Trang chủ</a></li>
+                    <li class="nav-item"><a id="navCatCan" class="nav-link cursor-pointer" onclick="filterCategory('Kính cận')">Kính cận</a></li>
+                    <li class="nav-item"><a id="navCatRam" class="nav-link cursor-pointer" onclick="filterCategory('Kính râm')">Kính râm</a></li>
+                    <li class="nav-item"><a id="navCatThoiTrang" class="nav-link cursor-pointer" onclick="filterCategory('Kính thời trang')">Kính thời trang</a></li>
+                </ul>
+
+                <!-- Tìm kiếm -->
+                <div class="d-flex me-3">
+                    <input class="form-control form-control-sm me-2" type="search" id="searchInput" placeholder="Tìm tên kính, hãng..." onkeyup="handleSearch(event)">
+                    <button id="btnSearch" class="btn btn-outline-light btn-sm" onclick="triggerSearch()"><i class="bi bi-search"></i></button>
+                </div>
+
+                <!-- Giỏ hàng -->
+                <button id="btnNavCart" class="btn btn-warning btn-sm position-relative me-3 fw-bold" onclick="navTo('cart')">
+                    <i class="bi bi-cart3"></i> Giỏ hàng
+                    <span id="cartCountBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                </button>
+
+                <!-- Khu vực Xác thực người dùng (Auth Menu) -->
+                <div id="authNavArea" class="d-flex align-items-center"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- KHU VỰC THÔNG BÁO FLASH -->
+    <div class="container mt-3" id="alertContainer"></div>
+
+    <!-- MAIN BODY CÁC TRANG (SPA VIEW) -->
+    <main class="flex-grow-1" id="appView"></main>
+
+    <!-- FOOTER -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <h5 class="text-warning fw-bold mb-1">OptiLux Eyewear Store</h5>
+            <p class="small text-secondary mb-1">Chất lượng - Đẳng cấp - Phong cách thời thượng</p>
+            <p class="small text-secondary mb-0">Địa chỉ: 123 Cầu Giấy, Hà Nội | Hotline: 1900 6868</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 1. DỮ LIỆU BAN ĐẦU (SEED DATA - 16 SẢN PHẨM)
+        const INITIAL_USERS = [
+            { id: 1, fullname: 'Quản Trị Viên', email: 'admin@optilux.vn', phone: '0988888888', password: 'admin123', role: 'admin' },
+            { id: 2, fullname: 'Nguyễn Văn An', email: 'customer@gmail.com', phone: '0912345678', password: '123456', role: 'customer' }
+        ];
+
+        const INITIAL_PRODUCTS = [
+            {
+                id: 1,
+                name: 'Kính Cận Aviator Classic Titanium',
+                sku: 'OPT-AV01',
+                category: 'Kính cận',
+                brand: 'Ray-Ban',
+                price: 1250000,
+                sale_price: 950000,
+                stock: 15,
+                gender: 'Unisex',
+                shape: 'Phi công',
+                material: 'Titanium',
+                image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600',
+                description: 'Gọng kính phi công kinh điển, làm từ chất liệu Titanium siêu nhẹ không gây mỏi sống mũi.'
+            },
+            {
+                id: 2,
+                name: 'Kính Râm Polarized Đen Bóng UV400',
+                sku: 'OPT-SUN02',
+                category: 'Kính râm',
+                brand: 'Oakley',
+                price: 850000,
+                sale_price: null,
+                stock: 20,
+                gender: 'Nam',
+                shape: 'Vuông',
+                material: 'Acetate cao cấp',
+                image: 'https://images.unsplash.com/photo-1508296695146-257a814070b4?w=600',
+                description: 'Tròng kính Polarized phân cực loại bỏ 100% tia UV chói lóa khi lái xe và đi biển.'
+            },
+            {
+                id: 3,
+                name: 'Kính Thời Trang Mắt Mèo Sang Trọng',
+                sku: 'OPT-CAT03',
+                category: 'Kính thời trang',
+                brand: 'Gucci Style',
+                price: 1500000,
+                sale_price: 1200000,
+                stock: 8,
+                gender: 'Nữ',
+                shape: 'Mắt mèo',
+                material: 'Hợp kim mạ vàng',
+                image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600',
+                description: 'Thiết kế góc cạnh tôn lên nét thanh tú của phái đẹp, tạo điểm nhấn phong cách ấn tượng.'
+            },
+            {
+                id: 4,
+                name: 'Kính Tròn Retro Vintage Hàn Quốc',
+                sku: 'OPT-RET04',
+                category: 'Kính cận',
+                brand: 'Gentle Monster',
+                price: 450000,
+                sale_price: 390000,
+                stock: 25,
+                gender: 'Unisex',
+                shape: 'Tròn',
+                material: 'Kim loại dẻo',
+                image: 'https://images.unsplash.com/photo-1591076482161-42ce6da69f68?w=600',
+                description: 'Kiểu gọng tròn thanh mảnh phong cách học đường Hàn Quốc, phù hợp học sinh sinh viên.'
+            },
+            {
+                id: 5,
+                name: 'Kính Cận Vuông Công Sở Classic',
+                sku: 'OPT-SQ05',
+                category: 'Kính cận',
+                brand: 'Bolon',
+                price: 890000,
+                sale_price: 750000,
+                stock: 18,
+                gender: 'Nam',
+                shape: 'Vuông',
+                material: 'Nhựa TR90 siêu nhẹ',
+                image: 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=600',
+                description: 'Form vuông nam tính, thích hợp môi trường công sở, chống va đập và chịu lực tốt.'
+            },
+            {
+                id: 6,
+                name: 'Kính Râm Phi Công Mạ Vàng 24K',
+                sku: 'OPT-AV06',
+                category: 'Kính râm',
+                brand: 'Ray-Ban',
+                price: 2100000,
+                sale_price: 1850000,
+                stock: 12,
+                gender: 'Nam',
+                shape: 'Phi công',
+                material: 'Hợp kim Titanium',
+                image: 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=600',
+                description: 'Tròng kính màu xanh rêu chống chói cao cấp kết hợp gọng mạ vàng sang trọng.'
+            },
+            {
+                id: 7,
+                name: 'Kính Thời Trang Gọng Trắng Pastel',
+                sku: 'OPT-FAS07',
+                category: 'Kính thời trang',
+                brand: 'Gentle Monster',
+                price: 680000,
+                sale_price: null,
+                stock: 14,
+                gender: 'Nữ',
+                shape: 'Mắt mèo',
+                material: 'Acetate đúc',
+                image: 'https://images.unsplash.com/photo-1509695507497-903c140c43b0?w=600',
+                description: 'Thiết kế trẻ trung, tạo điểm nhấn nổi bật cho các bộ trang phục dạo phố.'
+            },
+            {
+                id: 8,
+                name: 'Kính Râm Clubmaster Cổ Điển',
+                sku: 'OPT-CM08',
+                category: 'Kính râm',
+                brand: 'Ray-Ban',
+                price: 1350000,
+                sale_price: 1150000,
+                stock: 9,
+                gender: 'Unisex',
+                shape: 'Vuông',
+                material: 'Đồi mồi & Kim loại',
+                image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600',
+                description: 'Phong cách Browline huyền thoại thập niên 60, tôn vinh đường nét khuôn mặt.'
+            },
+            {
+                id: 9,
+                name: 'Kính Cận Nửa Gọng Thanh Lịch',
+                sku: 'OPT-HL09',
+                category: 'Kính cận',
+                brand: 'Seiko',
+                price: 1650000,
+                sale_price: 1450000,
+                stock: 10,
+                gender: 'Nam',
+                shape: 'Vuông',
+                material: 'Titanium nguyên chất',
+                image: 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=600',
+                description: 'Gọng xẻ cước tối giản, tinh tế, đệm mũi êm ái thích hợp đeo làm việc cả ngày.'
+            },
+            {
+                id: 10,
+                name: 'Kính Thời Trang Gradient Nắng Hạ',
+                sku: 'OPT-SUN10',
+                category: 'Kính thời trang',
+                brand: 'Gucci Style',
+                price: 1850000,
+                sale_price: 1590000,
+                stock: 7,
+                gender: 'Nữ',
+                shape: 'Tròn',
+                material: 'Kim loại mạ Crom',
+                image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600',
+                description: 'Màu tròng chuyển sắc gradient thời thượng, bảo vệ mắt khỏi tia UV cường độ cao.'
+            },
+            {
+                id: 11,
+                name: 'Kính Cận Trong Suốt Giới Trẻ',
+                sku: 'OPT-TR11',
+                category: 'Kính cận',
+                brand: 'Bolon',
+                price: 490000,
+                sale_price: 420000,
+                stock: 30,
+                gender: 'Unisex',
+                shape: 'Tròn',
+                material: 'Nhựa dẻo TR90',
+                image: 'https://images.unsplash.com/photo-1591076482161-42ce6da69f68?w=600',
+                description: 'Gọng trong suốt nhẹ nhàng, bắt sáng tốt, xu hướng phong cách Hàn Quốc.'
+            },
+            {
+                id: 12,
+                name: 'Kính Thể Thao Phân Cực Chạy Bộ',
+                sku: 'OPT-SP12',
+                category: 'Kính râm',
+                brand: 'Oakley',
+                price: 1100000,
+                sale_price: null,
+                stock: 16,
+                gender: 'Unisex',
+                shape: 'Vuông',
+                material: 'Polycarbonate chịu lực',
+                image: 'https://images.unsplash.com/photo-1508296695146-257a814070b4?w=600',
+                description: 'Ôm sát khuôn mặt, chống trượt khi vận động mạnh hoặc tham gia thể thao ngoài trời.'
+            },
+            {
+                id: 13,
+                name: 'Kính Cận Đa Giác Thời Thượng',
+                sku: 'OPT-POLY13',
+                category: 'Kính cận',
+                brand: 'Gentle Monster',
+                price: 790000,
+                sale_price: 690000,
+                stock: 22,
+                gender: 'Unisex',
+                shape: 'Tròn',
+                material: 'Hợp kim nhẹ',
+                image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600',
+                description: 'Form đa giác lục lăng độc đáo, phá cách nhưng vẫn giữ được nét thanh thoát.'
+            },
+            {
+                id: 14,
+                name: 'Kính Râm Mắt Mèo Oversized Đen',
+                sku: 'OPT-CAT14',
+                category: 'Kính râm',
+                brand: 'Gucci Style',
+                price: 1750000,
+                sale_price: 1490000,
+                stock: 11,
+                gender: 'Nữ',
+                shape: 'Mắt mèo',
+                material: 'Acetate bóng',
+                image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600',
+                description: 'Bản gọng to cá tính, che chắn toàn diện vùng mắt và tạo phong cách thời trang đỉnh cao.'
+            },
+            {
+                id: 15,
+                name: 'Kính Cận Không Viền Rimless Doanh Nhân',
+                sku: 'OPT-RIM15',
+                category: 'Kính cận',
+                brand: 'Seiko',
+                price: 2450000,
+                sale_price: 2200000,
+                stock: 5,
+                gender: 'Nam',
+                shape: 'Vuông',
+                material: 'Titanium nguyên khối',
+                image: 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=600',
+                description: 'Thiết kế khoan ốc không viền sang trọng, trọng lượng cực nhẹ, tôn vẻ đĩnh đạc.'
+            },
+            {
+                id: 16,
+                name: 'Kính Râm Tròn Steampunk Độc Lạ',
+                sku: 'OPT-STM16',
+                category: 'Kính thời trang',
+                brand: 'Ray-Ban',
+                price: 990000,
+                sale_price: 850000,
+                stock: 14,
+                gender: 'Unisex',
+                shape: 'Tròn',
+                material: 'Hợp kim đồng cổ',
+                image: 'https://images.unsplash.com/photo-1591076482161-42ce6da69f68?w=600',
+                description: 'Viền chắn gió hai bên gọng phong cách steampunk cổ điển, thích hợp cho chụp ảnh nghệ thuật.'
+            }
+        ];
+
+        // 2. STATE & AUTO SYNC SEED
+        let cachedProducts = JSON.parse(localStorage.getItem('optilux_products'));
+        // Tự động nạp bộ 16 sản phẩm nếu bộ nhớ tạm đang rỗng hoặc chỉ có 4 sản phẩm cũ
+        if (!cachedProducts || cachedProducts.length <= 4) {
+            cachedProducts = INITIAL_PRODUCTS;
+            localStorage.setItem('optilux_products', JSON.stringify(cachedProducts));
+        }
+
+        let state = {
+            currentUser: JSON.parse(localStorage.getItem('optilux_currentUser')) || null,
+            users: JSON.parse(localStorage.getItem('optilux_users')) || INITIAL_USERS,
+            products: cachedProducts,
+            cart: JSON.parse(localStorage.getItem('optilux_cart')) || [],
+            orders: JSON.parse(localStorage.getItem('optilux_orders')) || [
+                {
+                    id: 101,
+                    customer: 'Nguyễn Văn An',
+                    email: 'customer@gmail.com',
+                    phone: '0912345678',
+                    address: 'Số 10 Phố Huế, Hoàn Kiếm, Hà Nội',
+                    total: 980000,
+                    status: 'Đang giao',
+                    createdAt: '03/10/2026 14:30',
+                    items: [{ name: 'Kính Cận Aviator Classic Titanium', qty: 1, price: 950000 }]
+                }
+            ],
+            currentPage: 'home',
+            discountRate: 0,
+            activeFilters: { category: '', shape: '', gender: '', priceRange: '', search: '', sort: '' },
+            selectedProductId: null
+        };
+
+        function saveData() {
+            localStorage.setItem('optilux_users', JSON.stringify(state.users));
+            localStorage.setItem('optilux_products', JSON.stringify(state.products));
+            localStorage.setItem('optilux_cart', JSON.stringify(state.cart));
+            localStorage.setItem('optilux_orders', JSON.stringify(state.orders));
+            localStorage.setItem('optilux_currentUser', JSON.stringify(state.currentUser));
+            updateCartBadge();
+            renderAuthNav();
+        }
+
+        function updateCartBadge() {
+            const count = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartCountBadge');
+            if (badge) badge.innerText = count;
+        }
+
+        function showAlert(msg, type = 'success') {
+            const container = document.getElementById('alertContainer');
+            if (!container) return;
+            container.innerHTML = `
+                <div id="flashAlert" class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="bi bi-info-circle me-1"></i> ${msg}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            setTimeout(() => { container.innerHTML = ''; }, 3500);
+        }
+
+        function formatMoney(num) {
+            return new Intl.NumberFormat('vi-VN').format(num) + 'đ';
+        }
+
+        // 3. NAVIGATION
+        function navTo(page, param = null) {
+            if (page.startsWith('admin') && (!state.currentUser || state.currentUser.role !== 'admin')) {
+                showAlert('Bạn cần đăng nhập tài khoản Quản trị viên để truy cập!', 'danger');
+                state.currentPage = 'login';
+                render();
+                return;
+            }
+
+            state.currentPage = page;
+            if (page === 'detail') state.selectedProductId = param;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            render();
+        }
+
+        function filterCategory(cat) {
+            state.activeFilters.category = cat;
+            navTo('products');
+        }
+
+        function handleSearch(e) {
+            if (e.key === 'Enter') triggerSearch();
+        }
+
+        function triggerSearch() {
+            const val = document.getElementById('searchInput').value.trim();
+            state.activeFilters.search = val;
+            navTo('products');
+        }
+
+        // 4. AUTHENTICATION HANDLERS
+        function handleLogin(e) {
+            e.preventDefault();
+            const form = e.target;
+            const email = form.email.value.trim().toLowerCase();
+            const password = form.password.value;
+
+            const user = state.users.find(u => u.email.toLowerCase() === email && u.password === password);
+
+            if (user) {
+                state.currentUser = { id: user.id, fullname: user.fullname, email: user.email, phone: user.phone, role: user.role };
+                saveData();
+                showAlert(`Đăng nhập thành công! Chào mừng <strong>${user.fullname}</strong>.`, 'success');
+                if (user.role === 'admin') {
+                    navTo('admin-dashboard');
+                } else {
+                    navTo('home');
+                }
+            } else {
+                showAlert('Email hoặc mật khẩu không chính xác!', 'danger');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const form = e.target;
+            const fullname = form.fullname.value.trim();
+            const email = form.email.value.trim().toLowerCase();
+            const phone = form.phone.value.trim();
+            const password = form.password.value;
+            const confirmPassword = form.confirm_password.value;
+
+            if (password !== confirmPassword) {
+                showAlert('Mật khẩu xác nhận không trùng khớp!', 'danger');
+                return;
+            }
+
+            if (state.users.some(u => u.email.toLowerCase() === email)) {
+                showAlert('Email này đã được sử dụng. Vui lòng chọn email khác!', 'danger');
+                return;
+            }
+
+            const newUser = {
+                id: Date.now(),
+                fullname: fullname,
+                email: email,
+                phone: phone,
+                password: password,
+                role: 'customer'
+            };
+
+            state.users.push(newUser);
+            state.currentUser = { id: newUser.id, fullname: newUser.fullname, email: newUser.email, phone: newUser.phone, role: newUser.role };
+            saveData();
+            showAlert('Tạo tài khoản thành công! Bạn đã được tự động đăng nhập.', 'success');
+            navTo('home');
+        }
+
+        function handleLogout() {
+            state.currentUser = null;
+            saveData();
+            showAlert('Bạn đã đăng xuất khỏi hệ thống.', 'info');
+            navTo('home');
+        }
+
+        function renderAuthNav() {
+            const area = document.getElementById('authNavArea');
+            const roleIndicator = document.getElementById('roleIndicator');
+            if (!area || !roleIndicator) return;
+
+            if (state.currentUser) {
+                roleIndicator.className = state.currentUser.role === 'admin' ? 'badge bg-danger' : 'badge bg-success';
+                roleIndicator.innerText = state.currentUser.role === 'admin' ? `Admin: ${state.currentUser.fullname}` : `Khách: ${state.currentUser.fullname}`;
+
+                area.innerHTML = `
+                    <div class="dropdown">
+                        <button id="userDropdownBtn" class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i> <span id="navUserName">${state.currentUser.fullname}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            ${state.currentUser.role === 'admin' ? `
+                                <li><a id="dropdownAdminLink" class="dropdown-item fw-bold text-primary cursor-pointer" onclick="navTo('admin-dashboard')"><i class="bi bi-speedometer2 me-2"></i>Trang Admin</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                            ` : ''}
+                            <li><a id="dropdownOrdersLink" class="dropdown-item cursor-pointer" onclick="navTo('orders')"><i class="bi bi-box-seam me-2"></i>Đơn mua của tôi</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a id="dropdownLogoutLink" class="dropdown-item text-danger cursor-pointer" onclick="handleLogout()"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+                        </ul>
+                    </div>
+                `;
+            } else {
+                roleIndicator.className = 'badge bg-secondary';
+                roleIndicator.innerText = 'Chưa đăng nhập';
+
+                area.innerHTML = `
+                    <button id="btnOpenLogin" class="btn btn-outline-light btn-sm me-2" onclick="navTo('login')">Đăng nhập</button>
+                    <button id="btnOpenRegister" class="btn btn-primary btn-sm" onclick="navTo('register')">Đăng ký</button>
+                `;
+            }
+        }
+
+        // 5. GIỎ HÀNG & CHECKOUT
+        function addToCart(productId, qty = 1) {
+            const prod = state.products.find(p => p.id === productId);
+            if (!prod) return;
+
+            const existing = state.cart.find(item => item.id === productId);
+            const actualPrice = prod.sale_price ? prod.sale_price : prod.price;
+
+            if (existing) {
+                existing.quantity += qty;
+            } else {
+                state.cart.push({
+                    id: prod.id,
+                    name: prod.name,
+                    price: actualPrice,
+                    image: prod.image,
+                    quantity: qty
+                });
+            }
+            saveData();
+            showAlert(`Đã thêm <strong>${prod.name}</strong> vào giỏ hàng!`);
+        }
+
+        function changeCartQty(id, delta) {
+            const item = state.cart.find(i => i.id === id);
+            if (!item) return;
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+                state.cart = state.cart.filter(i => i.id !== id);
+            }
+            saveData();
+            render();
+        }
+
+        function removeCartItem(id) {
+            state.cart = state.cart.filter(i => i.id !== id);
+            saveData();
+            render();
+            showAlert('Đã xóa sản phẩm khỏi giỏ hàng', 'warning');
+        }
+
+        function applyCoupon() {
+            const input = document.getElementById('couponInput');
+            if (!input) return;
+            const code = input.value.trim().toUpperCase();
+            if (code === 'KINH10') {
+                state.discountRate = 0.10;
+                showAlert('Đã áp dụng mã giảm giá 10%!');
+            } else {
+                showAlert('Mã giảm giá không hợp lệ!', 'danger');
+            }
+            render();
+        }
+
+        function handleCheckout(e) {
+            e.preventDefault();
+            const form = e.target;
+            const subtotal = state.cart.reduce((s, i) => s + i.price * i.quantity, 0);
+            const discount = subtotal * state.discountRate;
+            const shipping = 30000;
+            const total = subtotal - discount + shipping;
+
+            const newOrder = {
+                id: Math.floor(1000 + Math.random() * 9000),
+                customer: form.fullname.value,
+                email: form.email ? form.email.value : (state.currentUser ? state.currentUser.email : ''),
+                phone: form.phone.value,
+                address: form.address.value,
+                note: form.note.value,
+                total: total,
+                status: 'Chờ xác nhận',
+                createdAt: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}),
+                items: [...state.cart]
+            };
+
+            state.cart.forEach(c => {
+                const p = state.products.find(prod => prod.id === c.id);
+                if (p) p.stock = Math.max(0, p.stock - c.quantity);
+            });
+
+            state.orders.unshift(newOrder);
+            state.cart = [];
+            state.discountRate = 0;
+            saveData();
+            navTo('order-success', newOrder.id);
+        }
+
+        // 6. ADMIN HANDLERS
+        function handleCreateProduct(e) {
+            e.preventDefault();
+            const form = e.target;
+            const newP = {
+                id: Date.now(),
+                name: form.name.value,
+                sku: form.sku.value,
+                category: form.category.value,
+                brand: form.brand.value,
+                price: parseFloat(form.price.value),
+                sale_price: form.sale_price.value ? parseFloat(form.sale_price.value) : null,
+                stock: parseInt(form.stock.value) || 10,
+                shape: form.shape.value,
+                gender: form.gender.value,
+                material: form.material.value,
+                image: form.image.value || 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600',
+                description: form.description.value
+            };
+            state.products.unshift(newP);
+            saveData();
+            const modalEl = document.getElementById('addProductModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            showAlert('Đã thêm kính mới vào hệ thống kho!');
+            render();
+        }
+
+        function deleteProduct(id) {
+            if (confirm('Bạn chắc chắn muốn xóa kính này?')) {
+                state.products = state.products.filter(p => p.id !== id);
+                saveData();
+                showAlert('Đã xóa kính thành công!', 'info');
+                render();
+            }
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            const ord = state.orders.find(o => o.id === orderId);
+            if (ord) {
+                ord.status = newStatus;
+                saveData();
+                showAlert(`Đã cập nhật đơn #${orderId} sang trạng thái: "${newStatus}"`);
+                render();
+            }
+        }
+
+        // 7. RENDER LOGIC
+        function render() {
+            const app = document.getElementById('appView');
+
+            // 1. TRANG ĐĂNG NHẬP
+            if (state.currentPage === 'login') {
+                app.innerHTML = `
+                    <div class="container my-5">
+                        <div class="card auth-card border-0 shadow mx-auto p-4">
+                            <h3 class="fw-bold text-center mb-1">Đăng Nhập</h3>
+                            <p class="text-center text-muted small mb-4">Nhập tài khoản để quản lý đơn hàng & mua sắm</p>
+                            
+                            <form id="loginForm" onsubmit="handleLogin(event)">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Email</label>
+                                    <input type="email" id="loginEmail" name="email" class="form-control" required placeholder="admin@optilux.vn hoặc customer@gmail.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Mật khẩu</label>
+                                    <input type="password" id="loginPassword" name="password" class="form-control" required placeholder="Nhập mật khẩu...">
+                                </div>
+                                <button type="submit" id="btnLoginSubmit" class="btn btn-warning w-100 fw-bold py-2 mb-3">Đăng Nhập Ngay</button>
+                                <div class="text-center small">
+                                    Chưa có tài khoản? <a href="javascript:void(0)" id="linkToRegister" class="fw-bold text-decoration-none" onclick="navTo('register')">Đăng ký thành viên</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 2. TRANG ĐĂNG KÝ
+            else if (state.currentPage === 'register') {
+                app.innerHTML = `
+                    <div class="container my-5">
+                        <div class="card auth-card border-0 shadow mx-auto p-4">
+                            <h3 class="fw-bold text-center mb-1">Tạo Tài Khoản</h3>
+                            <p class="text-center text-muted small mb-4">Trở thành thành viên OptiLux để nhận ưu đãi</p>
+                            
+                            <form id="registerForm" onsubmit="handleRegister(event)">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Họ và tên *</label>
+                                    <input type="text" id="regFullname" name="fullname" class="form-control" required placeholder="Nguyễn Văn A">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Email *</label>
+                                    <input type="email" id="regEmail" name="email" class="form-control" required placeholder="user@gmail.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Số điện thoại *</label>
+                                    <input type="tel" id="regPhone" name="phone" class="form-control" required placeholder="0912345678">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Mật khẩu *</label>
+                                    <input type="password" id="regPassword" name="password" class="form-control" required placeholder="Tối thiểu 6 ký tự">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Xác nhận mật khẩu *</label>
+                                    <input type="password" id="regConfirmPassword" name="confirm_password" class="form-control" required placeholder="Nhập lại mật khẩu trên">
+                                </div>
+                                <button type="submit" id="btnRegisterSubmit" class="btn btn-primary w-100 fw-bold py-2 mb-3">Đăng Ký</button>
+                                <div class="text-center small">
+                                    Đã có tài khoản? <a href="javascript:void(0)" id="linkToLogin" class="fw-bold text-decoration-none" onclick="navTo('login')">Đăng nhập</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 3. TRANG CHỦ
+            else if (state.currentPage === 'home') {
+                app.innerHTML = `
+                    <div class="bg-secondary text-white py-5 text-center" style="background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=1600') center/cover;">
+                        <div class="container py-5">
+                            <span class="badge bg-warning text-dark px-3 py-2 fs-6 fw-bold mb-3">BỘ SƯU TẬP 2026</span>
+                            <h1 class="display-4 fw-bold">Khẳng Định Phong Cách Cùng OptiLux</h1>
+                            <p class="lead mb-4">Gọng Titan siêu nhẹ, tròng chống tia UV400 và ánh sáng xanh. Nhập mã <strong>KINH10</strong> để giảm ngay 10%.</p>
+                            <button id="btnHeroExplore" class="btn btn-warning btn-lg px-4 fw-bold" onclick="filterCategory('')">Khám phá sản phẩm</button>
+                        </div>
+                    </div>
+
+                    <div class="container my-5">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="fw-bold"><i class="bi bi-fire text-danger"></i> Sản phẩm bán chạy</h3>
+                            <button id="btnViewAllProducts" class="btn btn-link text-decoration-none" onclick="filterCategory('')">Xem tất cả <i class="bi bi-arrow-right"></i></button>
+                        </div>
+                        <div class="row g-4" id="homeProductList">
+                            ${state.products.slice(0, 8).map(p => renderProductCard(p)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 4. TRANG SẢN PHẨM & BỘ LỌC
+            else if (state.currentPage === 'products') {
+                let list = [...state.products];
+                const f = state.activeFilters;
+
+                if (f.category) list = list.filter(p => p.category === f.category);
+                if (f.shape) list = list.filter(p => p.shape === f.shape);
+                if (f.gender) list = list.filter(p => p.gender === f.gender);
+                if (f.search) list = list.filter(p => p.name.toLowerCase().includes(f.search.toLowerCase()) || p.brand.toLowerCase().includes(f.search.toLowerCase()));
+
+                if (f.priceRange === 'under_500') list = list.filter(p => p.price < 500000);
+                else if (f.priceRange === '500_1000') list = list.filter(p => p.price >= 500000 && p.price <= 1000000);
+                else if (f.priceRange === 'over_1000') list = list.filter(p => p.price > 1000000);
+
+                if (f.sort === 'asc') list.sort((a,b) => (a.sale_price||a.price) - (b.sale_price||b.price));
+                if (f.sort === 'desc') list.sort((a,b) => (b.sale_price||b.price) - (a.sale_price||a.price));
+
+                app.innerHTML = `
+                    <div class="container my-4">
+                        <div class="row">
+                            <div class="col-lg-3 mb-4">
+                                <div class="card border-0 shadow-sm p-3">
+                                    <h5 class="fw-bold mb-3"><i class="bi bi-funnel"></i> Bộ lọc sản phẩm</h5>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Danh mục</label>
+                                        <select id="filterCategorySelect" class="form-select form-select-sm" onchange="state.activeFilters.category = this.value; render();">
+                                            <option value="" ${!f.category?'selected':''}>Tất cả danh mục</option>
+                                            <option value="Kính cận" ${f.category==='Kính cận'?'selected':''}>Kính cận</option>
+                                            <option value="Kính râm" ${f.category==='Kính râm'?'selected':''}>Kính râm</option>
+                                            <option value="Kính thời trang" ${f.category==='Kính thời trang'?'selected':''}>Kính thời trang</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Mức giá</label>
+                                        <select id="filterPriceSelect" class="form-select form-select-sm" onchange="state.activeFilters.priceRange = this.value; render();">
+                                            <option value="" ${!f.priceRange?'selected':''}>Tất cả mức giá</option>
+                                            <option value="under_500" ${f.priceRange==='under_500'?'selected':''}>Dưới 500.000đ</option>
+                                            <option value="500_1000" ${f.priceRange==='500_1000'?'selected':''}>500.000đ - 1.000.000đ</option>
+                                            <option value="over_1000" ${f.priceRange==='over_1000'?'selected':''}>Trên 1.000.000đ</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Kiểu dáng gọng</label>
+                                        <select id="filterShapeSelect" class="form-select form-select-sm" onchange="state.activeFilters.shape = this.value; render();">
+                                            <option value="" ${!f.shape?'selected':''}>Tất cả kiểu dáng</option>
+                                            <option value="Vuông" ${f.shape==='Vuông'?'selected':''}>Vuông</option>
+                                            <option value="Tròn" ${f.shape==='Tròn'?'selected':''}>Tròn</option>
+                                            <option value="Phi công" ${f.shape==='Phi công'?'selected':''}>Phi công</option>
+                                            <option value="Mắt mèo" ${f.shape==='Mắt mèo'?'selected':''}>Mắt mèo</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Giới tính</label>
+                                        <select id="filterGenderSelect" class="form-select form-select-sm" onchange="state.activeFilters.gender = this.value; render();">
+                                            <option value="" ${!f.gender?'selected':''}>Mọi giới tính</option>
+                                            <option value="Nam" ${f.gender==='Nam'?'selected':''}>Nam</option>
+                                            <option value="Nữ" ${f.gender==='Nữ'?'selected':''}>Nữ</option>
+                                            <option value="Unisex" ${f.gender==='Unisex'?'selected':''}>Unisex</option>
+                                        </select>
+                                    </div>
+
+                                    <button id="btnResetFilter" class="btn btn-outline-secondary btn-sm w-100" onclick="state.activeFilters = {category:'',shape:'',gender:'',priceRange:'',search:'',sort:''}; render();">Đặt lại bộ lọc</button>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-9">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span>Hiển thị: <strong id="productCount">${list.length}</strong> sản phẩm</span>
+                                    <div class="d-flex align-items-center">
+                                        <span class="small me-2">Sắp xếp:</span>
+                                        <button id="btnSortAsc" class="btn btn-sm btn-outline-dark me-1" onclick="state.activeFilters.sort='asc'; render();">Giá tăng</button>
+                                        <button id="btnSortDesc" class="btn btn-sm btn-outline-dark" onclick="state.activeFilters.sort='desc'; render();">Giá giảm</button>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3" id="productsGrid">
+                                    ${list.length > 0 ? list.map(p => renderProductCard(p, 'col-md-4')).join('') : '<div class="col-12 py-5 text-center text-muted"><i class="bi bi-inbox fs-1"></i><p>Không tìm thấy sản phẩm phù hợp!</p></div>'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 5. TRANG CHI TIẾT SẢN PHẨM
+            else if (state.currentPage === 'detail') {
+                const prod = state.products.find(p => p.id === state.selectedProductId);
+                if (!prod) return navTo('products');
+
+                app.innerHTML = `
+                    <div class="container my-5">
+                        <nav aria-label="breadcrumb" class="mb-4">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="javascript:void(0)" onclick="navTo('home')">Trang chủ</a></li>
+                                <li class="breadcrumb-item"><a href="javascript:void(0)" onclick="navTo('products')">${prod.category}</a></li>
+                                <li class="breadcrumb-item active" id="detailProductNameBreadcrumb">${prod.name}</li>
+                            </ol>
+                        </nav>
+                        <div class="row g-5">
+                            <div class="col-md-6">
+                                <img id="detailProductImage" src="${prod.image}" class="img-fluid rounded-4 shadow-sm w-100" style="max-height: 420px; object-fit: cover;">
+                            </div>
+                            <div class="col-md-6">
+                                <span class="badge bg-warning text-dark mb-2">${prod.category}</span>
+                                <h2 class="fw-bold" id="detailProductName">${prod.name}</h2>
+                                <p class="text-muted">Mã SKU: <strong id="detailProductSku">${prod.sku}</strong> | Hãng: <strong id="detailProductBrand">${prod.brand}</strong></p>
+                                
+                                <div class="my-3">
+                                    ${prod.sale_price ? `
+                                        <span id="detailProductPrice" class="text-danger fw-bold fs-3">${formatMoney(prod.sale_price)}</span>
+                                        <span class="text-muted text-decoration-line-through fs-5 ms-3">${formatMoney(prod.price)}</span>
+                                    ` : `<span id="detailProductPrice" class="text-primary fw-bold fs-3">${formatMoney(prod.price)}</span>`}
+                                </div>
+
+                                <ul class="list-group list-group-flush my-4 border rounded-3">
+                                    <li class="list-group-item d-flex justify-content-between"><span>Kiểu dáng gọng:</span> <strong>${prod.shape}</strong></li>
+                                    <li class="list-group-item d-flex justify-content-between"><span>Chất liệu:</span> <strong>${prod.material}</strong></li>
+                                    <li class="list-group-item d-flex justify-content-between"><span>Giới tính phù hợp:</span> <strong>${prod.gender}</strong></li>
+                                    <li class="list-group-item d-flex justify-content-between"><span>Tình trạng kho:</span> <strong id="detailProductStock" class="${prod.stock > 0 ? 'text-success' : 'text-danger'}">${prod.stock > 0 ? `Còn hàng (${prod.stock})` : 'Hết hàng'}</strong></li>
+                                </ul>
+
+                                <p class="text-secondary">${prod.description}</p>
+
+                                <div class="d-flex align-items-center gap-3 mt-4">
+                                    <button id="btnDetailAddToCart" class="btn btn-warning btn-lg px-4 fw-bold" onclick="addToCart(${prod.id}, 1)" ${prod.stock <= 0 ? 'disabled' : ''}>
+                                        <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ hàng
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 6. TRANG GIỎ HÀNG
+            else if (state.currentPage === 'cart') {
+                const subtotal = state.cart.reduce((s, i) => s + i.price * i.quantity, 0);
+                const discount = subtotal * state.discountRate;
+                const shipping = subtotal > 0 ? 30000 : 0;
+                const total = Math.max(0, subtotal - discount + shipping);
+
+                app.innerHTML = `
+                    <div class="container my-5">
+                        <h3 class="fw-bold mb-4"><i class="bi bi-cart3"></i> Giỏ hàng của bạn</h3>
+                        ${state.cart.length > 0 ? `
+                            <div class="row g-4">
+                                <div class="col-lg-8">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="table-responsive">
+                                            <table class="table align-middle mb-0" id="cartTable">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Kính mắt</th>
+                                                        <th>Đơn giá</th>
+                                                        <th>Số lượng</th>
+                                                        <th>Thành tiền</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${state.cart.map(item => `
+                                                        <tr id="cartRow_${item.id}">
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <img src="${item.image}" width="50" height="50" class="rounded me-3 object-fit-cover">
+                                                                    <span class="fw-semibold">${item.name}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>${formatMoney(item.price)}</td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <button class="btn btn-outline-secondary btn-sm px-2 btn-qty-minus" onclick="changeCartQty(${item.id}, -1)">-</button>
+                                                                    <span class="cart-item-qty fw-bold">${item.quantity}</span>
+                                                                    <button class="btn btn-outline-secondary btn-sm px-2 btn-qty-plus" onclick="changeCartQty(${item.id}, 1)">+</button>
+                                                                </div>
+                                                            </td>
+                                                            <td class="fw-bold">${formatMoney(item.price * item.quantity)}</td>
+                                                            <td><button class="btn btn-link text-danger p-0 btn-remove-item" onclick="removeCartItem(${item.id})"><i class="bi bi-trash"></i></button></td>
+                                                        </tr>
+                                                    `).join('')}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="card border-0 shadow-sm p-4">
+                                        <h5 class="fw-bold mb-3">Tóm tắt đơn hàng</h5>
+                                        <div class="input-group input-group-sm mb-3">
+                                            <input type="text" id="couponInput" class="form-control" placeholder="Mã giảm: KINH10">
+                                            <button id="btnApplyCoupon" class="btn btn-dark" onclick="applyCoupon()">Áp dụng</button>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2"><span>Tạm tính:</span><span id="cartSubtotal">${formatMoney(subtotal)}</span></div>${discount > 0 ? `<div class="d-flex justify-content-between mb-2 text-success"><span>Giảm giá (10%):</span><span id="cartDiscount">-${formatMoney(discount)}</span></div>` : ''}
+                                        <div class="d-flex justify-content-between mb-2"><span>Phí vận chuyển:</span><span id="cartShipping">${formatMoney(shipping)}</span></div>
+                                        <hr>
+                                        <div class="d-flex justify-content-between mb-4"><span class="fw-bold fs-5">Tổng tiền:</span><span id="cartTotal" class="fw-bold fs-5 text-danger">${formatMoney(total)}</span></div>
+                                        <button id="btnProceedCheckout" class="btn btn-warning fw-bold w-100 py-2" onclick="navTo('checkout')">Tiến hành đặt hàng</button>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="text-center py-5">
+                                <i class="bi bi-cart-x fs-1 text-muted"></i>
+                                <p class="lead text-muted mt-2">Giỏ hàng của bạn đang trống</p>
+                                <button id="btnEmptyCartExplore" class="btn btn-warning fw-bold" onclick="navTo('products')">Khám phá sản phẩm ngay</button>
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+
+            // 7. TRANG ĐẶT HÀNG (CHECKOUT)
+            else if (state.currentPage === 'checkout') {
+                const subtotal = state.cart.reduce((s, i) => s + i.price * i.quantity, 0);
+                const discount = subtotal * state.discountRate;
+                const shipping = 30000;
+                const total = subtotal - discount + shipping;
+
+                app.innerHTML = `
+                    <div class="container my-5">
+                        <div class="row g-5">
+                            <div class="col-md-7">
+                                <h4 class="fw-bold mb-3"><i class="bi bi-geo-alt"></i> Thông tin giao nhận kính</h4>
+                                <form id="checkoutForm" onsubmit="handleCheckout(event)">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Họ và tên người nhận *</label>
+                                        <input type="text" id="inputFullname" name="fullname" class="form-control" required value="${state.currentUser ? state.currentUser.fullname : ''}" placeholder="Nguyễn Văn A">
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Số điện thoại nhận hàng *</label>
+                                            <input type="tel" id="inputPhone" name="phone" class="form-control" required value="${state.currentUser ? state.currentUser.phone : ''}" placeholder="0912345678">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Email nhận hóa đơn</label>
+                                            <input type="email" id="inputEmail" name="email" class="form-control" value="${state.currentUser ? state.currentUser.email : ''}" placeholder="email@gmail.com">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Địa chỉ nhận hàng chi tiết *</label>
+                                        <input type="text" id="inputAddress" name="address" class="form-control" required placeholder="Số nhà, tên đường, phường/xã, quận/huyện...">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Ghi chú độ cận hoặc lưu ý khi giao</label>
+                                        <textarea id="inputNote" name="note" class="form-control" rows="2" placeholder="Ví dụ: Mắt trái 1.5 độ, mắt phải 2.0 độ..."></textarea>
+                                    </div>
+                                    <div class="p-3 bg-light rounded-3 mb-4">
+                                        <label class="form-label fw-bold mb-2">Hình thức thanh toán</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" id="paymentCod" checked>
+                                            <label class="form-check-label" for="paymentCod">Thanh toán khi nhận hàng (COD)</label>
+                                        </div>
+                                    </div>
+                                    <button id="btnSubmitOrder" type="submit" class="btn btn-warning btn-lg w-100 fw-bold">Xác nhận đặt hàng ngay</button>
+                                </form>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="card border-0 shadow-sm p-4">
+                                    <h5 class="fw-bold mb-3">Đơn hàng cần thanh toán</h5>
+                                    <ul class="list-unstyled mb-3">
+                                        ${state.cart.map(i => `<li class="d-flex justify-content-between small mb-2"><span>${i.name} × ${i.quantity}</span><strong>${formatMoney(i.price * i.quantity)}</strong></li>`).join('')}
+                                    </ul>
+                                    <hr>
+                                    <div class="d-flex justify-content-between mb-2"><span>Tạm tính:</span><span>${formatMoney(subtotal)}</span></div>
+                                    ${discount > 0 ? `<div class="d-flex justify-content-between mb-2 text-success"><span>Giảm giá:</span><span>-${formatMoney(discount)}</span></div>` : ''}
+                                    <div class="d-flex justify-content-between mb-2"><span>Vận chuyển:</span><span>${formatMoney(shipping)}</span></div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between"><span class="fw-bold fs-5">Tổng cộng:</span><span id="checkoutTotalAmount" class="fw-bold fs-5 text-danger">${formatMoney(total)}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 8. ĐẶT HÀNG THÀNH CÔNG
+            else if (state.currentPage === 'order-success') {
+                app.innerHTML = `
+                    <div class="container text-center my-5 py-5">
+                        <div class="card border-0 shadow-sm p-5 mx-auto" style="max-width: 500px;">
+                            <i class="bi bi-check-circle-fill text-success display-1"></i>
+                            <h3 class="fw-bold mt-4" id="successOrderTitle">Đặt hàng thành công!</h3>
+                            <p class="text-muted">Đơn hàng của bạn đã được ghi nhận. Bộ phận chăm sóc khách hàng của OptiLux sẽ sớm liên hệ xác nhận đơn kính của bạn.</p>
+                            <div class="d-flex justify-content-center gap-3 mt-4">
+                                <button id="btnContinueShopping" class="btn btn-outline-dark" onclick="navTo('products')">Tiếp tục mua hàng</button>
+                                <button id="btnViewHistoryOrders" class="btn btn-warning fw-bold" onclick="navTo('orders')">Xem đơn hàng</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 9. LỊCH SỬ ĐƠN MUA
+            else if (state.currentPage === 'orders') {
+                const myOrders = (state.currentUser && state.currentUser.role !== 'admin')
+                    ? state.orders.filter(o => o.email === state.currentUser.email || o.customer === state.currentUser.fullname)
+                    : state.orders;
+
+                app.innerHTML = `
+                    <div class="container my-5">
+                        <h4 class="fw-bold mb-4"><i class="bi bi-box-seam"></i> Lịch sử đơn đặt mua</h4>
+                        <div class="card border-0 shadow-sm">
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0" id="ordersTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Mã đơn</th>
+                                            <th>Thời gian đặt</th>
+                                            <th>Khách nhận</th>
+                                            <th>Tổng tiền</th>
+                                            <th>Trạng thái đơn</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${myOrders.length > 0 ? myOrders.map(o => `
+                                            <tr id="orderRow_${o.id}">
+                                                <td class="fw-bold">#${o.id}</td>
+                                                <td>${o.createdAt}</td>
+                                                <td>${o.customer}</td>
+                                                <td class="fw-bold text-danger">${formatMoney(o.total)}</td>
+                                                <td><span class="badge bg-info text-dark">${o.status}</span></td>
+                                            </tr>
+                                        `).join('') : `
+                                            <tr><td colspan="5" class="text-center py-4 text-muted">Chưa có đơn hàng nào!</td></tr>
+                                        `}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 10. TRANG QUẢN TRỊ ADMIN
+            else if (state.currentPage === 'admin-dashboard') {
+                const totalRevenue = state.orders.reduce((s, o) => s + o.total, 0);
+
+                app.innerHTML = `
+                    <div class="container my-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h3 class="fw-bold mb-0"><i class="bi bi-speedometer2"></i> Trung tâm Quản trị Admin</h3>
+                                <small class="text-muted">Đang quản trị bởi: <strong>${state.currentUser.fullname}</strong> (${state.currentUser.email})</small>
+                            </div>
+                            <button id="btnOpenAddModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                                <i class="bi bi-plus-circle me-1"></i> Thêm kính mắt mới
+                            </button>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm bg-primary text-white p-3">
+                                    <h6 class="small text-uppercase">TỔNG DOANH THU</h6>
+                                    <h4 class="fw-bold mb-0" id="adminRevenue">${formatMoney(totalRevenue)}</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm bg-success text-white p-3">
+                                    <h6 class="small text-uppercase">TỔNG ĐƠN HÀNG</h6>
+                                    <h4 class="fw-bold mb-0" id="adminOrderCount">${state.orders.length}</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm bg-warning text-dark p-3">
+                                    <h6 class="small text-uppercase">SẢN PHẨM TRONG KHO</h6>
+                                    <h4 class="fw-bold mb-0" id="adminProductCount">${state.products.length}</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm bg-info text-dark p-3">
+                                    <h6 class="small text-uppercase">TỔNG THÀNH VIÊN</h6>
+                                    <h4 class="fw-bold mb-0" id="adminUserCount">${state.users.length}</h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white py-3 fw-bold">Danh sách kho kính mắt</div>
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0" id="adminProductTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Ảnh</th>
+                                            <th>Mã SKU</th>
+                                            <th>Tên kính</th>
+                                            <th>Danh mục</th>
+                                            <th>Giá bán</th>
+                                            <th>Tồn kho</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${state.products.map(p => `
+                                            <tr id="adminRow_${p.id}">
+                                                <td><img src="${p.image}" width="45" height="45" class="rounded object-fit-cover"></td>
+                                                <td><code>${p.sku}</code></td>
+                                                <td class="fw-bold">${p.name}</td>
+                                                <td>${p.category}</td>
+                                                <td>${formatMoney(p.price)}</td>
+                                                <td>${p.stock}</td>
+                                                <td>
+                                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteProduct(${p.id})"><i class="bi bi-trash"></i> Xóa</button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white py-3 fw-bold">Quản lý và chuyển trạng thái đơn hàng</div>
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0" id="adminOrderTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Mã đơn</th>
+                                            <th>Người nhận</th>
+                                            <th>Địa chỉ nhận</th>
+                                            <th>Tổng tiền</th>
+                                            <th>Cập nhật trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${state.orders.map(o => `
+                                            <tr id="adminOrderRow_${o.id}">
+                                                <td class="fw-bold">#${o.id}</td>
+                                                <td>${o.customer}<br><small class="text-muted">${o.phone}</small></td>
+                                                <td><small>${o.address}</small></td>
+                                                <td class="fw-bold text-danger">${formatMoney(o.total)}</td>
+                                                <td>
+                                                    <select class="form-select form-select-sm" style="width: 170px;" onchange="updateOrderStatus(${o.id}, this.value)">
+                                                        ${['Chờ xác nhận', 'Đã xác nhận', 'Đang chuẩn bị', 'Đang giao', 'Đã giao', 'Đã hủy'].map(st => `
+                                                            <option value="${st}" ${o.status===st?'selected':''}>${st}</option>
+                                                        `).join('')}
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Thêm sản phẩm -->
+                    <div class="modal fade" id="addProductModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <form id="addProductForm" onsubmit="handleCreateProduct(event)">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold">Thêm kính mắt mới vào kho</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body row g-3">
+                                        <div class="col-md-8">
+                                            <label class="form-label small fw-bold">Tên sản phẩm *</label>
+                                            <input type="text" id="adminInputName" name="name" class="form-control" required placeholder="Kính Cận Ray-Ban...">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Mã SKU *</label>
+                                            <input type="text" id="adminInputSku" name="sku" class="form-control" required placeholder="OPT-09">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Danh mục</label>
+                                            <select id="adminSelectCategory" name="category" class="form-select">
+                                                <option value="Kính cận">Kính cận</option>
+                                                <option value="Kính râm">Kính râm</option>
+                                                <option value="Kính thời trang">Kính thời trang</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Hãng</label>
+                                            <input type="text" id="adminInputBrand" name="brand" class="form-control" required placeholder="Ray-Ban, Oakley...">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Giá niêm yết (VNĐ) *</label>
+                                            <input type="number" id="adminInputPrice" name="price" class="form-control" required placeholder="800000">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Giá khuyến mãi</label>
+                                            <input type="number" id="adminInputSalePrice" name="sale_price" class="form-control" placeholder="Để trống nếu không giảm">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Số lượng tồn kho</label>
+                                            <input type="number" id="adminInputStock" name="stock" value="15" class="form-control">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Kiểu dáng</label>
+                                            <select id="adminSelectShape" name="shape" class="form-select">
+                                                <option value="Vuông">Vuông</option>
+                                                <option value="Tròn">Tròn</option>
+                                                <option value="Phi công">Phi công</option>
+                                                <option value="Mắt mèo">Mắt mèo</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Giới tính</label>
+                                            <select id="adminSelectGender" name="gender" class="form-select">
+                                                <option value="Unisex">Unisex</option>
+                                                <option value="Nam">Nam</option>
+                                                <option value="Nữ">Nữ</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Chất liệu</label>
+                                            <input type="text" id="adminInputMaterial" name="material" value="Titanium" class="form-control">
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label small fw-bold">Link ảnh sản phẩm (URL)</label>
+                                            <input type="url" id="adminInputImage" name="image" class="form-control" value="https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600">
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label small fw-bold">Mô tả sản phẩm</label>
+                                            <textarea id="adminInputDescription" name="description" class="form-control" rows="2"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                        <button id="btnAdminSaveProduct" type="submit" class="btn btn-primary fw-bold">Lưu vào kho hàng</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderProductCard(p, colClass = 'col-md-3') {
+            return `
+                <div class="${colClass}" id="productItem_${p.id}">
+                    <div class="card h-100 product-card shadow-sm border-0">
+                        <img src="${p.image}" class="card-img-top product-img" alt="${p.name}">
+                        <div class="card-body d-flex flex-column">
+                            <span class="badge bg-light text-dark mb-2 align-self-start border">${p.brand}</span>
+                            <h6 class="card-title fw-bold text-truncate cursor-pointer" onclick="navTo('detail', ${p.id})">${p.name}</h6>
+                            <div class="mt-auto">
+                                <div class="mb-3">
+                                    ${p.sale_price ? `
+                                        <span class="text-danger fw-bold fs-5">${formatMoney(p.sale_price)}</span>
+                                        <span class="text-muted text-decoration-line-through small ms-1">${formatMoney(p.price)}</span>
+                                    ` : `<span class="text-primary fw-bold fs-5">${formatMoney(p.price)}</span>`}
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-dark btn-sm flex-grow-1 btn-detail" onclick="navTo('detail', ${p.id})">Chi tiết</button>
+                                    <button class="btn btn-warning btn-sm btn-quick-add" onclick="addToCart(${p.id}, 1)" title="Thêm vào giỏ"><i class="bi bi-cart-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // INIT
+        updateCartBadge();
+        renderAuthNav();
+        render();
+    </script>
+</body>
+</html>
