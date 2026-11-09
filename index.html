@@ -557,126 +557,6 @@
             }
         }
 
-        // ================= HÀM KIỂM TRA SỐ ĐIỆN THOẠI (CHO PHÉP NHẬP CHỮ ĐỂ KIỂM THỬ NHƯNG HIỂN THỊ THÔNG BÁO PHẢI NHẬP SỐ) =================
-        const VN_PHONE_REGEX = /^(03|05|07|08|09)[0-9]{8}$/;
-
-        function checkPhoneValidationDetail(rawPhone) {
-            const val = (rawPhone || '').trim();
-            if (!val) {
-                return { valid: false, errorType: 'empty', message: 'Vui lòng nhập số điện thoại!' };
-            }
-            // Kiểm tra nếu có chứa chữ cái hoặc ký tự đặc biệt (không phải số 0-9)
-            if (!/^[0-9]+$/.test(val)) {
-                return { 
-                    valid: false, 
-                    errorType: 'not_number', 
-                    message: 'Phải nhập số! Số điện thoại chỉ được phép nhập chữ số (0-9), không được nhập chữ cái hoặc ký tự đặc biệt.' 
-                };
-            }
-            // Kiểm tra đầu số nhà mạng Việt Nam (03, 05, 07, 08, 09)
-            if (!/^(03|05|07|08|09)/.test(val)) {
-                return { 
-                    valid: false, 
-                    errorType: 'invalid_prefix', 
-                    message: 'Đầu số không hợp lệ! Vui lòng nhập đúng đầu số nhà mạng Việt Nam (03, 05, 07, 08, 09).' 
-                };
-            }
-            // Kiểm tra độ dài đúng 10 chữ số
-            if (val.length !== 10) {
-                return { 
-                    valid: false, 
-                    errorType: 'invalid_length', 
-                    message: `Số điện thoại phải gồm đúng 10 chữ số (hiện tại bạn đang nhập ${val.length} số).` 
-                };
-            }
-            return { valid: true, errorType: null, message: 'Số điện thoại hợp lệ.' };
-        }
-
-        function handlePhoneRealtimeInput(inputEl, feedbackId, isStrict = false) {
-            if (!inputEl) return;
-            const val = inputEl.value;
-            const feedbackEl = feedbackId ? document.getElementById(feedbackId) : null;
-
-            if (!val || val.trim() === '') {
-                inputEl.classList.remove('is-invalid', 'is-valid');
-                if (feedbackEl) {
-                    feedbackEl.style.display = 'none';
-                    feedbackEl.innerText = '';
-                }
-                return;
-            }
-
-            // 1. Nếu người dùng gõ chữ cái hoặc ký tự đặc biệt -> thông báo "Phải nhập số!" ngay lập tức
-            if (!/^[0-9]+$/.test(val.trim())) {
-                inputEl.classList.add('is-invalid');
-                inputEl.classList.remove('is-valid');
-                if (feedbackEl) {
-                    feedbackEl.style.display = 'block';
-                    feedbackEl.className = 'invalid-feedback d-block fw-semibold';
-                    feedbackEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i>Phải nhập số! Số điện thoại không được chứa chữ cái hoặc ký tự đặc biệt.';
-                }
-                return;
-            }
-
-            // 2. Nếu chỉ nhập số nhưng sai đầu số nhà mạng VN (khi đã nhập từ 2 số trở lên hoặc khi rời ô/submit)
-            if ((val.trim().length >= 2 || isStrict) && !/^(03|05|07|08|09)/.test(val.trim())) {
-                inputEl.classList.add('is-invalid');
-                inputEl.classList.remove('is-valid');
-                if (feedbackEl) {
-                    feedbackEl.style.display = 'block';
-                    feedbackEl.className = 'invalid-feedback d-block fw-semibold';
-                    feedbackEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i>Đầu số không hợp lệ! Vui lòng nhập đầu số nhà mạng Việt Nam (03, 05, 07, 08, 09).';
-                }
-                return;
-            }
-
-            // 3. Nếu vượt quá 10 chữ số
-            if (val.trim().length > 10) {
-                inputEl.classList.add('is-invalid');
-                inputEl.classList.remove('is-valid');
-                if (feedbackEl) {
-                    feedbackEl.style.display = 'block';
-                    feedbackEl.className = 'invalid-feedback d-block fw-semibold';
-                    feedbackEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>Số điện thoại chỉ gồm 10 chữ số (hiện tại: ${val.trim().length} số).`;
-                }
-                return;
-            }
-
-            // 4. Nếu chưa đủ 10 số khi rời ô (onblur) hoặc khi bấm Đặt hàng/Đăng ký (isStrict = true)
-            if (isStrict && val.trim().length < 10) {
-                inputEl.classList.add('is-invalid');
-                inputEl.classList.remove('is-valid');
-                if (feedbackEl) {
-                    feedbackEl.style.display = 'block';
-                    feedbackEl.className = 'invalid-feedback d-block fw-semibold';
-                    feedbackEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>Số điện thoại phải đủ 10 chữ số (hiện tại: ${val.trim().length} số).`;
-                }
-                return;
-            }
-
-            // 5. Nếu đủ 10 số và đúng đầu số VN
-            if (VN_PHONE_REGEX.test(val.trim())) {
-                inputEl.classList.remove('is-invalid');
-                inputEl.classList.add('is-valid');
-                if (feedbackEl) {
-                    feedbackEl.style.display = 'block';
-                    feedbackEl.className = 'valid-feedback d-block fw-semibold';
-                    feedbackEl.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Số điện thoại 10 số hợp lệ.';
-                }
-            } else {
-                // Đang gõ dở dưới 10 số và đúng đầu số
-                inputEl.classList.remove('is-invalid', 'is-valid');
-                if (feedbackEl) {
-                    feedbackEl.style.display = 'none';
-                    feedbackEl.innerText = '';
-                }
-            }
-        }
-
-        function validateVNPhone(phone) {
-            return checkPhoneValidationDetail(phone).valid;
-        }
-
         // ================= XỬ LÝ ĐĂNG KÝ VÀ ĐĂNG NHẬP =================
         function handleRegister(e) {
             e.preventDefault();
@@ -692,13 +572,9 @@
                 return;
             }
 
-            const phoneCheck = checkPhoneValidationDetail(phone);
-            if (!phoneCheck.valid) {
-                showAlert(phoneCheck.message, 'danger');
-                if (form.phone) {
-                    handlePhoneRealtimeInput(form.phone, 'registerPhoneFeedback', true);
-                    form.phone.focus();
-                }
+            const phoneRegex = /^(03|05|07|08|09)\d{8}$/;
+            if (!phoneRegex.test(phone)) {
+                showAlert('Số điện thoại không hợp lệ! Vui lòng nhập số di động 10 chữ số tại Việt Nam.', 'danger');
                 return;
             }
 
@@ -968,7 +844,7 @@
             }
 
             // 2. Kiểm tra chuỗi spam phím (VD: aaaaaa, 111111, asdfghjk)
-            const repeatedCharPattern = /(.)\1{4,}/;
+            const repeatedCharPattern = /(.){4,}/;
             if (repeatedCharPattern.test(clean)) {
                 return { valid: false, message: 'Địa chỉ chứa chuỗi ký tự lặp lại bất thường! Vui lòng nhập địa chỉ nhận hàng có thật.' };
             }
@@ -1007,13 +883,11 @@
                 return;
             }
 
-            // 3. CHỐNG SPAM: KIỂM TRA SỐ ĐIỆN THOẠI (BÁO LỖI RÕ RÀNG NẾU NHẬP CHỮ, KÝ TỰ ĐẶC BIỆT HOẶC SAI ĐẦU SỐ VN)
+            // 3. CHỐNG SPAM: KIỂM TRA SỐ ĐIỆN THOẠI HỢP LỆ THEO NHÀ MẠNG VIỆT NAM
             const phone = form.phone.value.trim();
-            const phoneCheck = checkPhoneValidationDetail(phone);
-            if (!phoneCheck.valid) {
-                showAlert(phoneCheck.message, 'danger');
-                handlePhoneRealtimeInput(form.phone, 'checkoutPhoneFeedback', true);
-                form.phone.focus();
+            const phoneRegex = /^(03|05|07|08|09)\d{8}$/;
+            if (!phoneRegex.test(phone)) {
+                showAlert('Số điện thoại không đúng chuẩn (phải gồm 10 số di động Việt Nam bắt đầu bằng 03, 05, 07, 08, 09)!', 'danger');
                 return;
             }
 
@@ -1501,9 +1375,8 @@
                                     <div class="row mb-3">
                                         <div class="col-md-6">
                                             <label class="form-label small fw-bold">Số điện thoại nhận hàng *</label>
-                                            <input type="text" id="checkoutPhone" name="phone" class="form-control" required autocomplete="tel" value="${(state.currentUser && state.currentUser.phone) ? state.currentUser.phone : ''}" placeholder="0912345678" oninput="handlePhoneRealtimeInput(this, 'checkoutPhoneFeedback')" onblur="handlePhoneRealtimeInput(this, 'checkoutPhoneFeedback', true)" title="Số điện thoại gồm 10 chữ số, bắt đầu bằng 03, 05, 07, 08 hoặc 09">
-                                            <div id="checkoutPhoneFeedback" style="display:none;"></div>
-                                            <small class="text-muted">Định dạng: 10 chữ số, đầu số nhà mạng VN (03, 05, 07, 08, 09)</small>
+                                            <input type="tel" name="phone" class="form-control" required value="${state.currentUser ? state.currentUser.phone : ''}" placeholder="0912345678" pattern="^(03|05|07|08|09)\d{8}$" title="Vui lòng nhập số di động 10 chữ số tại Việt Nam">
+                                            <small class="text-muted">Định dạng 10 số (03x, 05x, 07x, 08x, 09x)</small>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label small fw-bold">Email nhận mã đơn</label>
@@ -1691,9 +1564,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold">Số điện thoại di động *</label>
-                                    <input type="text" id="registerPhone" name="phone" class="form-control" required autocomplete="tel" placeholder="0912345678" oninput="handlePhoneRealtimeInput(this, 'registerPhoneFeedback')" onblur="handlePhoneRealtimeInput(this, 'registerPhoneFeedback', true)" title="Số điện thoại gồm 10 chữ số, bắt đầu bằng 03, 05, 07, 08 hoặc 09">
-                                    <div id="registerPhoneFeedback" style="display:none;"></div>
-                                    <small class="text-muted">Định dạng: 10 chữ số, đầu số nhà mạng VN (03, 05, 07, 08, 09)</small>
+                                    <input type="tel" name="phone" class="form-control" required placeholder="0912345678">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold">Mật khẩu *</label>
