@@ -3,28 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OptiLux Eyewear - Cửa Hàng Kính Mắt Cao Cấp</title>
+    <title>GLORISS Eyewear - Cửa Hàng Kính Mắt & Hệ Thống Quản Trị Kho SQL</title>
     <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f8f9fa; }
-        .product-card { transition: all 0.25s ease; border-radius: 12px; overflow: hidden; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; }
-        .product-img { height: 210px; object-fit: cover; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f8f9fa; color: #1e293b; }
+        .product-card { transition: all 0.25s ease; border-radius: 12px; overflow: hidden; background: #fff; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.12) !important; }
+        .product-img { height: 230px; object-fit: cover; width: 100%; background-color: #f1f5f9; }
         .cursor-pointer { cursor: pointer; }
-        .auth-card { max-width: 460px; border-radius: 14px; }
+        .auth-card { max-width: 480px; border-radius: 14px; }
         .switcher-bar { background-color: #111827; color: #9ca3af; padding: 7px 0; font-size: 0.85rem; }
+        .status-badge { font-size: 0.8rem; padding: 0.35em 0.65em; border-radius: 20px; }
+        .coupon-chip { font-size: 0.78rem; cursor: pointer; transition: 0.2s; }
+        .coupon-chip:hover { background-color: #ffc107 !important; color: #000 !important; }
+        .payment-box { border: 1.5px solid #dee2e6; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .payment-box.active { border-color: #ffc107; background-color: #fffdf5; }
+        .sql-terminal { background-color: #0f172a; color: #38bdf8; font-family: "Courier New", Courier, monospace; border-radius: 8px; max-height: 220px; overflow-y: auto; font-size: 0.82rem; }
+        .badge-premium { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+        .honeypot-field { position: absolute; left: -9999px; top: -9999px; opacity: 0; z-index: -1; }
     </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
 
-    <!-- THANH THÔNG TIN TÀI KHOẢN MẪU ĐỂ TEST -->
+    <!-- THANH THÔNG TIN TÀI KHOẢN TEST -->
     <div class="switcher-bar border-bottom border-secondary">
         <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
             <span>
                 <i class="bi bi-info-circle-fill text-warning me-1"></i>
-                Tài khoản test: <strong>admin@optilux.vn</strong> (Admin, mk: <code>admin123</code>) | <strong>customer@gmail.com</strong> (Khách, mk: <code>123456</code>)
+                Đăng nhập kiểm thử: <strong>Quản Trị Viên (Admin)</strong>: <code>admin@gloriss.vn</code> / <code>admin123</code> | <strong>Khách hàng</strong>: <code>Nguyễn Văn An</code> / <code>123456</code>
             </span>
             <span id="roleIndicator" class="badge bg-secondary">Chưa đăng nhập</span>
         </div>
@@ -33,23 +41,23 @@
     <!-- NAVBAR CHÍNH -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
         <div class="container">
-            <a id="brandLogo" class="navbar-brand fw-bold text-warning fs-4" href="javascript:void(0)" onclick="navTo('home')">
-                <i class="bi bi-eyeglasses me-2"></i>OptiLux
+            <a id="brandLogo" class="navbar-brand fw-bold text-warning fs-4" href="javascript:void(0)" onclick="filterCategory('')">
+                <i class="bi bi-eyeglasses me-2"></i>GLORISS
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a id="navHome" class="nav-link cursor-pointer" onclick="navTo('home')">Trang chủ</a></li>
-                    <li class="nav-item"><a id="navCatCan" class="nav-link cursor-pointer" onclick="filterCategory('Kính cận')">Kính cận</a></li>
-                    <li class="nav-item"><a id="navCatRam" class="nav-link cursor-pointer" onclick="filterCategory('Kính râm')">Kính râm</a></li>
-                    <li class="nav-item"><a id="navCatThoiTrang" class="nav-link cursor-pointer" onclick="filterCategory('Kính thời trang')">Kính thời trang</a></li>
+                    <li class="nav-item"><a class="nav-link cursor-pointer active" onclick="filterCategory('')">Tất cả sản phẩm</a></li>
+                    <li class="nav-item"><a class="nav-link cursor-pointer" onclick="filterCategory('Kính cận')">Kính cận</a></li>
+                    <li class="nav-item"><a class="nav-link cursor-pointer" onclick="filterCategory('Kính râm')">Kính râm</a></li>
+                    <li class="nav-item"><a class="nav-link cursor-pointer" onclick="filterCategory('Kính thời trang')">Kính thời trang</a></li>
                 </ul>
 
                 <!-- Tìm kiếm -->
                 <div class="d-flex me-3">
-                    <input class="form-control form-control-sm me-2" type="search" id="searchInput" placeholder="Tìm tên kính, hãng..." onkeyup="handleSearch(event)">
+                    <input class="form-control form-control-sm me-2" type="search" id="searchInput" placeholder="Tìm tên kính, mã SKU..." onkeyup="handleSearch(event)">
                     <button id="btnSearch" class="btn btn-outline-light btn-sm" onclick="triggerSearch()"><i class="bi bi-search"></i></button>
                 </div>
 
@@ -59,325 +67,344 @@
                     <span id="cartCountBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
                 </button>
 
-                <!-- Khu vực Xác thực người dùng (Auth Menu) -->
+                <!-- Khu vực xác thực người dùng -->
                 <div id="authNavArea" class="d-flex align-items-center"></div>
             </div>
         </div>
     </nav>
 
-    <!-- KHU VỰC THÔNG BÁO FLASH -->
+    <!-- THÔNG BÁO FLASH -->
     <div class="container mt-3" id="alertContainer"></div>
 
-    <!-- MAIN BODY CÁC TRANG (SPA VIEW) -->
+    <!-- MAIN SPA VIEW -->
     <main class="flex-grow-1" id="appView"></main>
 
     <!-- FOOTER -->
     <footer class="bg-dark text-white py-4 mt-5">
         <div class="container text-center">
-            <h5 class="text-warning fw-bold mb-1">OptiLux Eyewear Store</h5>
-            <p class="small text-secondary mb-1">Chất lượng - Đẳng cấp - Phong cách thời thượng</p>
+            <h5 class="text-warning fw-bold mb-1">GLORISS Eyewear Store & Inventory Engine</h5>
+            <p class="small text-secondary mb-1">Hệ thống phân phối mắt kính chính hãng & Tích hợp Quản trị Cơ sở Dữ liệu SQL</p>
             <p class="small text-secondary mb-0">Địa chỉ: 123 Cầu Giấy, Hà Nội | Hotline: 1900 6868</p>
         </div>
     </footer>
 
+    <!-- MODAL SỬA TỒN KHO & GIÁ TIỀN (ADMIN) -->
+    <div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow border-0">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square text-warning me-2"></i>Cập nhật Kho & Giá Sản Phẩm</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="editProductForm" onsubmit="handleSaveProductInventory(event)">
+                        <input type="hidden" id="editProdId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Tên sản phẩm</label>
+                            <input type="text" id="editProdName" class="form-control bg-light" readonly>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Mã SKU</label>
+                                <input type="text" id="editProdSku" class="form-control bg-light" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-danger">Số lượng tồn kho *</label>
+                                <input type="number" id="editProdStock" class="form-control" min="0" required>
+                                <small class="text-muted">Kho hàng sẵn có</small>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-primary">Giá niêm yết (VNĐ) *</label>
+                                <input type="number" id="editProdPrice" class="form-control" min="1000" step="1000" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-success">Giá khuyến mãi (VNĐ)</label>
+                                <input type="number" id="editProdSalePrice" class="form-control" min="0" step="1000" placeholder="Để trống nếu không giảm">
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info py-2 px-3 small mb-3">
+                            <i class="bi bi-database me-1"></i> <strong>Hệ thống SQL:</strong> Lệnh tự động kích hoạt: <code>UPDATE products SET stock=?, price=?, sale_price=? WHERE id=?</code>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy bỏ</button>
+                            <button type="submit" class="btn btn-primary btn-sm fw-bold"><i class="bi bi-save me-1"></i>Lưu thay đổi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADMIN ĐỔI TRẠNG THÁI ĐƠN HÀNG -->
+    <div class="modal fade" id="orderStatusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow border-0">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-box-seam me-2 text-warning"></i>Cập nhật đơn hàng #<span id="modalOrderIdDisplay"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="modalOrderDetails" class="bg-light p-3 rounded mb-3 small"></div>
+                    <form id="orderStatusForm" onsubmit="handleStatusFormSubmit(event)">
+                        <input type="hidden" id="modalOrderIdInput">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Chọn trạng thái đơn hàng mới:</label>
+                            <select id="modalStatusSelect" class="form-select">
+                                <option value="Chờ xác nhận">Chờ xác nhận</option>
+                                <option value="Đã xác nhận">Đã xác nhận</option>
+                                <option value="Đang chuẩn bị">Đang chuẩn bị</option>
+                                <option value="Đang giao">Đang giao</option>
+                                <option value="Đã giao">Đã giao</option>
+                                <option value="Đã hủy">Đã hủy</option>
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-primary btn-sm fw-bold"><i class="bi bi-check2-circle me-1"></i>Lưu trạng thái</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // 1. DỮ LIỆU BAN ĐẦU (SEED DATA - 16 SẢN PHẨM)
+        // BẢNG VOUCHER ĐA CẤP (PHÂN LOẠI THEO GIÁ TRỊ VÀ SẢN PHẨM CAO CẤP / PHỔ THÔNG)
+        const AVAILABLE_COUPONS = {
+            'KINH10': { 
+                type: 'percent', 
+                value: 0.10, 
+                label: 'Giảm 10% tổng đơn', 
+                minOrder: 0, 
+                minProductPrice: 0, 
+                tier: 'all', 
+                applicableIds: null,
+                desc: 'Áp dụng cho mọi giá trị đơn hàng'
+            },
+            'GIAM30K': { 
+                type: 'fixed', 
+                value: 30000, 
+                label: 'Giảm 30.000đ', 
+                minOrder: 400000, 
+                minProductPrice: 0, 
+                tier: 'standard', 
+                applicableIds: null,
+                desc: 'Đơn từ 400.000đ'
+            },
+            'GIAM50K': { 
+                type: 'fixed', 
+                value: 50000, 
+                label: 'Giảm 50.000đ', 
+                minOrder: 700000, 
+                minProductPrice: 0, 
+                tier: 'standard', 
+                applicableIds: null,
+                desc: 'Đơn từ 700.000đ'
+            },
+            'FREESHIP': { 
+                type: 'freeship', 
+                value: 30000, 
+                label: 'Freeship toàn quốc (30k)', 
+                minOrder: 500000, 
+                minProductPrice: 0, 
+                tier: 'all', 
+                applicableIds: null,
+                desc: 'Đơn từ 500.000đ'
+            },
+            'VIP150K': { 
+                type: 'fixed', 
+                value: 150000, 
+                label: 'VIP Giảm 150.000đ [Kính Cao Cấp]', 
+                minOrder: 1000000, 
+                minProductPrice: 1000000, 
+                tier: 'premium', 
+                applicableIds: null,
+                desc: 'Chỉ áp dụng khi đơn có kính từ 1.000.000đ trở lên'
+            },
+            'VIP250K': { 
+                type: 'fixed', 
+                value: 250000, 
+                label: 'VIP Giảm 250.000đ [Kính Thượng Hạng]', 
+                minOrder: 1250000, 
+                minProductPrice: 1250000, 
+                tier: 'luxury', 
+                applicableIds: null,
+                desc: 'Chỉ áp dụng khi đơn có kính từ 1.250.000đ trở lên'
+            },
+            'TITAN200': { 
+                type: 'fixed', 
+                value: 200000, 
+                label: 'Giảm 200.000đ riêng mẫu Titanium (#8, #24)', 
+                minOrder: 0, 
+                minProductPrice: 0, 
+                tier: 'special', 
+                applicableIds: [8, 24],
+                desc: 'Chỉ áp dụng cho mẫu Titanium #8 và #24'
+            }
+        };
+
+        function handleImgError(img, origFilename, prodId, prodName) {
+            const step = parseInt(img.dataset.retryStep || "0");
+            if (step === 0) {
+                img.dataset.retryStep = "1";
+                img.src = "images/" + origFilename;
+                return;
+            }
+            if (step === 1) {
+                img.dataset.retryStep = "2";
+                img.src = "img/" + origFilename;
+                return;
+            }
+            if (step === 2) {
+                img.dataset.retryStep = "3";
+                img.src = "./" + origFilename;
+                return;
+            }
+            img.onerror = null;
+            const bgColors = ['1e293b', '0f172a', '334155', '1e1b4b', '172554', '14532d', '701a75', '4c0519'];
+            const chosenBg = bgColors[prodId % bgColors.length];
+            const shortTitle = encodeURIComponent(`GLORISS #${prodId}`);
+            img.src = `https://placehold.co/600x400/${chosenBg}/ffffff?text=${shortTitle}`;
+        }
+
         const INITIAL_USERS = [
-            { id: 1, fullname: 'Quản Trị Viên', email: 'admin@optilux.vn', phone: '0988888888', password: 'admin123', role: 'admin' },
+            { id: 1, fullname: 'Quản Trị Viên', email: 'admin@gloriss.vn', phone: '0988888888', password: 'admin123', role: 'admin' },
             { id: 2, fullname: 'Nguyễn Văn An', email: 'customer@gmail.com', phone: '0912345678', password: '123456', role: 'customer' }
         ];
 
         const INITIAL_PRODUCTS = [
-            {
-                id: 1,
-                name: 'Kính Cận Aviator Classic Titanium',
-                sku: 'OPT-AV01',
-                category: 'Kính cận',
-                brand: 'Ray-Ban',
-                price: 1250000,
-                sale_price: 950000,
-                stock: 15,
-                gender: 'Unisex',
-                shape: 'Phi công',
-                material: 'Titanium',
-                image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600',
-                description: 'Gọng kính phi công kinh điển, làm từ chất liệu Titanium siêu nhẹ không gây mỏi sống mũi.'
-            },
-            {
-                id: 2,
-                name: 'Kính Râm Polarized Đen Bóng UV400',
-                sku: 'OPT-SUN02',
-                category: 'Kính râm',
-                brand: 'Oakley',
-                price: 850000,
-                sale_price: null,
-                stock: 20,
-                gender: 'Nam',
-                shape: 'Vuông',
-                material: 'Acetate cao cấp',
-                image: 'https://images.unsplash.com/photo-1508296695146-257a814070b4?w=600',
-                description: 'Tròng kính Polarized phân cực loại bỏ 100% tia UV chói lóa khi lái xe và đi biển.'
-            },
-            {
-                id: 3,
-                name: 'Kính Thời Trang Mắt Mèo Sang Trọng',
-                sku: 'OPT-CAT03',
-                category: 'Kính thời trang',
-                brand: 'Gucci Style',
-                price: 1500000,
-                sale_price: 1200000,
-                stock: 8,
-                gender: 'Nữ',
-                shape: 'Mắt mèo',
-                material: 'Hợp kim mạ vàng',
-                image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600',
-                description: 'Thiết kế góc cạnh tôn lên nét thanh tú của phái đẹp, tạo điểm nhấn phong cách ấn tượng.'
-            },
-            {
-                id: 4,
-                name: 'Kính Tròn Retro Vintage Hàn Quốc',
-                sku: 'OPT-RET04',
-                category: 'Kính cận',
-                brand: 'Gentle Monster',
-                price: 450000,
-                sale_price: 390000,
-                stock: 25,
-                gender: 'Unisex',
-                shape: 'Tròn',
-                material: 'Kim loại dẻo',
-                image: 'https://images.unsplash.com/photo-1591076482161-42ce6da69f68?w=600',
-                description: 'Kiểu gọng tròn thanh mảnh phong cách học đường Hàn Quốc, phù hợp học sinh sinh viên.'
-            },
-            {
-                id: 5,
-                name: 'Kính Cận Vuông Công Sở Classic',
-                sku: 'OPT-SQ05',
-                category: 'Kính cận',
-                brand: 'Bolon',
-                price: 890000,
-                sale_price: 750000,
-                stock: 18,
-                gender: 'Nam',
-                shape: 'Vuông',
-                material: 'Nhựa TR90 siêu nhẹ',
-                image: 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=600',
-                description: 'Form vuông nam tính, thích hợp môi trường công sở, chống va đập và chịu lực tốt.'
-            },
-            {
-                id: 6,
-                name: 'Kính Râm Phi Công Mạ Vàng 24K',
-                sku: 'OPT-AV06',
-                category: 'Kính râm',
-                brand: 'Ray-Ban',
-                price: 2100000,
-                sale_price: 1850000,
-                stock: 12,
-                gender: 'Nam',
-                shape: 'Phi công',
-                material: 'Hợp kim Titanium',
-                image: 'https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=600',
-                description: 'Tròng kính màu xanh rêu chống chói cao cấp kết hợp gọng mạ vàng sang trọng.'
-            },
-            {
-                id: 7,
-                name: 'Kính Thời Trang Gọng Trắng Pastel',
-                sku: 'OPT-FAS07',
-                category: 'Kính thời trang',
-                brand: 'Gentle Monster',
-                price: 680000,
-                sale_price: null,
-                stock: 14,
-                gender: 'Nữ',
-                shape: 'Mắt mèo',
-                material: 'Acetate đúc',
-                image: 'https://images.unsplash.com/photo-1509695507497-903c140c43b0?w=600',
-                description: 'Thiết kế trẻ trung, tạo điểm nhấn nổi bật cho các bộ trang phục dạo phố.'
-            },
-            {
-                id: 8,
-                name: 'Kính Râm Clubmaster Cổ Điển',
-                sku: 'OPT-CM08',
-                category: 'Kính râm',
-                brand: 'Ray-Ban',
-                price: 1350000,
-                sale_price: 1150000,
-                stock: 9,
-                gender: 'Unisex',
-                shape: 'Vuông',
-                material: 'Đồi mồi & Kim loại',
-                image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600',
-                description: 'Phong cách Browline huyền thoại thập niên 60, tôn vinh đường nét khuôn mặt.'
-            },
-            {
-                id: 9,
-                name: 'Kính Cận Nửa Gọng Thanh Lịch',
-                sku: 'OPT-HL09',
-                category: 'Kính cận',
-                brand: 'Seiko',
-                price: 1650000,
-                sale_price: 1450000,
-                stock: 10,
-                gender: 'Nam',
-                shape: 'Vuông',
-                material: 'Titanium nguyên chất',
-                image: 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=600',
-                description: 'Gọng xẻ cước tối giản, tinh tế, đệm mũi êm ái thích hợp đeo làm việc cả ngày.'
-            },
-            {
-                id: 10,
-                name: 'Kính Thời Trang Gradient Nắng Hạ',
-                sku: 'OPT-SUN10',
-                category: 'Kính thời trang',
-                brand: 'Gucci Style',
-                price: 1850000,
-                sale_price: 1590000,
-                stock: 7,
-                gender: 'Nữ',
-                shape: 'Tròn',
-                material: 'Kim loại mạ Crom',
-                image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600',
-                description: 'Màu tròng chuyển sắc gradient thời thượng, bảo vệ mắt khỏi tia UV cường độ cao.'
-            },
-            {
-                id: 11,
-                name: 'Kính Cận Trong Suốt Giới Trẻ',
-                sku: 'OPT-TR11',
-                category: 'Kính cận',
-                brand: 'Bolon',
-                price: 490000,
-                sale_price: 420000,
-                stock: 30,
-                gender: 'Unisex',
-                shape: 'Tròn',
-                material: 'Nhựa dẻo TR90',
-                image: 'https://images.unsplash.com/photo-1591076482161-42ce6da69f68?w=600',
-                description: 'Gọng trong suốt nhẹ nhàng, bắt sáng tốt, xu hướng phong cách Hàn Quốc.'
-            },
-            {
-                id: 12,
-                name: 'Kính Thể Thao Phân Cực Chạy Bộ',
-                sku: 'OPT-SP12',
-                category: 'Kính râm',
-                brand: 'Oakley',
-                price: 1100000,
-                sale_price: null,
-                stock: 16,
-                gender: 'Unisex',
-                shape: 'Vuông',
-                material: 'Polycarbonate chịu lực',
-                image: 'https://images.unsplash.com/photo-1508296695146-257a814070b4?w=600',
-                description: 'Ôm sát khuôn mặt, chống trượt khi vận động mạnh hoặc tham gia thể thao ngoài trời.'
-            },
-            {
-                id: 13,
-                name: 'Kính Cận Đa Giác Thời Thượng',
-                sku: 'OPT-POLY13',
-                category: 'Kính cận',
-                brand: 'Gentle Monster',
-                price: 790000,
-                sale_price: 690000,
-                stock: 22,
-                gender: 'Unisex',
-                shape: 'Tròn',
-                material: 'Hợp kim nhẹ',
-                image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600',
-                description: 'Form đa giác lục lăng độc đáo, phá cách nhưng vẫn giữ được nét thanh thoát.'
-            },
-            {
-                id: 14,
-                name: 'Kính Râm Mắt Mèo Oversized Đen',
-                sku: 'OPT-CAT14',
-                category: 'Kính râm',
-                brand: 'Gucci Style',
-                price: 1750000,
-                sale_price: 1490000,
-                stock: 11,
-                gender: 'Nữ',
-                shape: 'Mắt mèo',
-                material: 'Acetate bóng',
-                image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600',
-                description: 'Bản gọng to cá tính, che chắn toàn diện vùng mắt và tạo phong cách thời trang đỉnh cao.'
-            },
-            {
-                id: 15,
-                name: 'Kính Cận Không Viền Rimless Doanh Nhân',
-                sku: 'OPT-RIM15',
-                category: 'Kính cận',
-                brand: 'Seiko',
-                price: 2450000,
-                sale_price: 2200000,
-                stock: 5,
-                gender: 'Nam',
-                shape: 'Vuông',
-                material: 'Titanium nguyên khối',
-                image: 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=600',
-                description: 'Thiết kế khoan ốc không viền sang trọng, trọng lượng cực nhẹ, tôn vẻ đĩnh đạc.'
-            },
-            {
-                id: 16,
-                name: 'Kính Râm Tròn Steampunk Độc Lạ',
-                sku: 'OPT-STM16',
-                category: 'Kính thời trang',
-                brand: 'Ray-Ban',
-                price: 990000,
-                sale_price: 850000,
-                stock: 14,
-                gender: 'Unisex',
-                shape: 'Tròn',
-                material: 'Hợp kim đồng cổ',
-                image: 'https://images.unsplash.com/photo-1591076482161-42ce6da69f68?w=600',
-                description: 'Viền chắn gió hai bên gọng phong cách steampunk cổ điển, thích hợp cho chụp ảnh nghệ thuật.'
-            }
+            { id: 1, name: 'Gọng Kính Vuông Bo Góc Xám Khói Trong Suốt', sku: 'GLR-525849', category: 'Kính cận', brand: 'GLORISS', price: 850000, sale_price: 650000, stock: 22, gender: 'Unisex', shape: 'Vuông', material: 'Nhựa Acetate xám khói trong', image: '525849748_1055378003459016_6785356181979024907_n.jpg', description: 'Gọng kính vuông bo tròn nhẹ, tông xám khói trong suốt hiện đại và sáng da.' },
+            { id: 2, name: 'Gọng Kính Vuông Acetate Nâu Trà Hổ Phách 51-21-150', sku: 'GLR-532477', category: 'Kính cận', brand: 'GLORISS', price: 890000, sale_price: 680000, stock: 16, gender: 'Unisex', shape: 'Vuông', material: 'Nhựa Acetate nâu hổ phách', image: '532477319_1067463415583808_399643584112242461_n.jpg', description: 'Tông nâu trà amber ấm áp, lộ lõi kim loại càng kính bền bỉ, thông số 51-21-150 C7.' },
+            { id: 3, name: 'Gọng Kính Nửa Viền Browline Xám Khói Kim Loại', sku: 'GLR-542743', category: 'Kính cận', brand: 'GLORISS', price: 950000, sale_price: 750000, stock: 18, gender: 'Unisex', shape: 'Vuông', material: 'Acetate phối kim loại bạc', image: '542743950_1082534927409990_4171261760020351940_n.jpg', description: 'Dáng clubmaster với viền trên nhựa trong xám khói kết hợp viền kim loại dưới thanh thoát.' },
+            { id: 4, name: 'Gọng Kính Nửa Viền Đen Bạc Chạm Khắc Điêu Khắc Tinh Xảo', sku: 'GLR-558145', category: 'Kính cận', brand: 'GLORISS', price: 1100000, sale_price: 850000, stock: 15, gender: 'Unisex', shape: 'Vuông', material: 'Hợp kim mạ bạc phối Acetate đen', image: '558145006_1105380665125416_8522189778794243701_n.jpg', description: 'Khớp nối và càng kính chạm trổ hoa văn cổ điển sang trọng, lịch lãm.' },
+            { id: 5, name: 'Gọng Kính Mắt Mèo Nữ Quyến Rũ Càng Kim Loại Thanh Mảnh', sku: 'GLR-570522', category: 'Kính thời trang', brand: 'GLORISS', price: 890000, sale_price: 690000, stock: 14, gender: 'Nữ', shape: 'Mắt mèo', material: 'Acetate viền mỏng phối hợp kim', image: '570522318_1128217032841779_6725996021749038252_n.jpg', description: 'Dáng mắt mèo vát xếch tạo điểm nhấn sắc sảo, tôn đường nét khuôn mặt phái đẹp.' },
+            { id: 6, name: 'Gọng Kính Tròn Đa Giác Kim Loại Đen Mờ Phối Cầu Đồng', sku: 'GLR-583296', category: 'Kính cận', brand: 'GLORISS', price: 920000, sale_price: 720000, stock: 18, gender: 'Unisex', shape: 'Tròn', material: 'Titan / Hợp kim sơn tĩnh điện', image: '583296869_1148517517478397_352946444039422875_n.jpg', description: 'Khung kim loại thanh mảnh hoàn thiện đen nhám, cầu kính màu đồng retro.' },
+            { id: 7, name: 'Gọng Kính Nửa Viền LY2356 C4 Xanh Rêu Trầm 49-24-145', sku: 'GLR-LY2356', category: 'Kính cận', brand: 'GLORISS', price: 980000, sale_price: 760000, stock: 20, gender: 'Unisex', shape: 'Vuông', material: 'Acetate rêu khói phối kim loại', image: '599945129_1166706388992843_7060442165624612292_n.jpg', description: 'Mẫu kính LY2356 màu C4 thanh lịch, kích thước 49-24-145 phong cách trí thức.' },
+            { id: 8, name: 'Gọng Kính Titanium Vuông Bo Góc Đen Bóng Cao Cấp', sku: 'GLR-605534', category: 'Kính cận', brand: 'GLORISS', price: 1250000, sale_price: 1050000, stock: 25, gender: 'Unisex', shape: 'Vuông', material: 'Titanium siêu nhẹ chống gỉ', image: '605534053_1176777201319095_4701404897652910712_n.jpg', description: 'Gọng Titanium siêu bền, trọng lượng nhẹ ôm khít khuôn mặt, chống chịu lực vượt trội.' },
+            { id: 9, name: 'Kính Mát Kim Loại Vuông Vát Góc Tròng Nâu Trà Cổ Điển', sku: 'GLR-616134', category: 'Kính râm', brand: 'GLORISS', price: 1150000, sale_price: 880000, stock: 12, gender: 'Unisex', shape: 'Vuông', material: 'Khung hợp kim sáng phối tròng UV400', image: '616134920_1187056246957857_4622861026029269177_n.jpg', description: 'Form mắt vuông vát góc kim loại bạc mảnh mai, tròng nâu ấm áp chống chói khi đi nắng.' },
+            { id: 10, name: 'Kính Râm Acetate Bản Dày Đinh Tán Kim Loại Mũi Tên Đen', sku: 'GLR-627186', category: 'Kính râm', brand: 'GLORISS', price: 1350000, sale_price: 1150000, stock: 10, gender: 'Unisex', shape: 'Vuông', material: 'Acetate đen bóng cao cấp', image: '627186451_1203829001947248_6982740213305301561_n.jpg', description: 'Dáng kính râm đen đậm dày dặn, khớp càng kính đính chi tiết kim loại góc cạnh mạnh mẽ.' },
+            { id: 11, name: 'Gọng Kính K9147 C17 Vuông Xanh Rêu Trong Suốt 52-22-150', sku: 'GLR-K9147', category: 'Kính cận', brand: 'GLORISS', price: 890000, sale_price: 690000, stock: 18, gender: 'Unisex', shape: 'Vuông', material: 'Acetate trong suốt lộ cốt khía rãnh', image: '644833751_1226691152994366_657526534521975656_n.jpg', description: 'Mẫu K9147 màu C17 tông rêu khói lộ cốt kim loại tinh xảo ở càng kính.' },
+            { id: 12, name: 'Gọng Kính KBT98301 C4 Nâu Trà Kèm Đệm Mũi Rời 49-22-150', sku: 'GLR-KBT98301', category: 'Kính cận', brand: 'GLORISS', price: 920000, sale_price: 720000, stock: 20, gender: 'Unisex', shape: 'Vuông', material: 'Acetate cao cấp phối đệm mũi kim loại', image: '670916402_1260512239612257_3402860768403219051_n.jpg', description: 'Mẫu KBT98301 màu C4 nâu trà thanh nhã, trang bị đệm mũi rời giúp chống trượt khi đeo.' },
+            { id: 13, name: 'Gọng Kính Vuông Đen Bóng Cổ Điển Tinh Giản Khóe Mắt Đinh Tán', sku: 'GLR-703136', category: 'Kính cận', brand: 'GLORISS', price: 790000, sale_price: 590000, stock: 25, gender: 'Unisex', shape: 'Vuông', material: 'Acetate đen bóng', image: '703136423_1289247956738685_1143325246230384269_n.jpg', description: 'Gọng kính vuông cơ bản dễ đeo, chất nhựa bóng bẩy kết hợp chốt kim loại tinh tế.' },
+            { id: 14, name: 'Gọng Kính Vuông Bo Tròn Nhẹ Màu Xanh Trà Trong Suốt', sku: 'GLR-703924', category: 'Kính cận', brand: 'GLORISS', price: 850000, sale_price: 650000, stock: 16, gender: 'Unisex', shape: 'Vuông', material: 'Acetate trong suốt', image: '703924479_1289248243405323_5586697157412411796_n.jpg', description: 'Khung vuông vát nhẹ góc, tông màu rêu trà trong suốt mang lại cảm giác nhẹ nhàng, trí thức.' },
+            { id: 15, name: 'Kính Râm Oval Xám Trong Suốt Họa Tiết 4 Chỉ Trắng', sku: 'GLR-710573', category: 'Kính râm', brand: 'GLORISS', price: 1450000, sale_price: 1250000, stock: 10, gender: 'Unisex', shape: 'Tròn', material: 'Acetate xám trong suốt', image: '710573074_1299164252413722_8416920444502907846_n.jpg', description: 'Phong cách thời trang avant-garde với dáng oval hẹp, điểm nhấn 4 vạch chéo cá tính trên càng kính.' },
+            { id: 16, name: 'Gọng Kính Tròn Boston Nâu Hổ Phách Càng Họa Tiết Gỗ', sku: 'GLR-724195', category: 'Kính cận', brand: 'GLORISS', price: 890000, sale_price: 690000, stock: 15, gender: 'Unisex', shape: 'Tròn', material: 'Acetate nâu hổ phách phối càng vân gỗ', image: '724195339_1310603904603090_2550477616759459595_n.jpg', description: 'Viền kính bo tròn tông màu hổ phách ấm áp kết hợp càng kính vân gỗ vintage mộc mạc.' },
+            { id: 17, name: 'Gọng Kính Tròn Boston Xám Rêu Khói Càng Vân Gỗ Đen', sku: 'GLR-724265', category: 'Kính cận', brand: 'GLORISS', price: 890000, sale_price: 690000, stock: 15, gender: 'Unisex', shape: 'Tròn', material: 'Acetate xám rêu khói phối càng gỗ mun', image: '724265430_1310603901269757_1271966434669066655_n.jpg', description: 'Sự kết hợp giữa viền nhựa màu rêu khói trong suốt và càng kính vân gỗ đen lịch lãm.' },
+            { id: 18, name: 'Gọng Kính Vuông Đen Bản Dày Cổ Điển Khóe Đinh Tán Đôi', sku: 'GLR-729219', category: 'Kính cận', brand: 'GLORISS', price: 850000, sale_price: 650000, stock: 20, gender: 'Unisex', shape: 'Vuông', material: 'Acetate đen bóng', image: '729219628_1320686296928184_7158751012489128399_n.jpg', description: 'Thiết kế viền vuông to bản cá tính, điểm chốt đinh tán đôi ở khóe kính tạo nét ấn tượng.' },
+            { id: 19, name: 'Gọng Kính Tròn Boston Xanh Rêu Cầu Kim Loại Thanh Thoát', sku: 'GLR-750355', category: 'Kính cận', brand: 'GLORISS', price: 920000, sale_price: 720000, stock: 15, gender: 'Unisex', shape: 'Tròn', material: 'Acetate xanh rêu phối cầu hợp kim', image: '750355674_1338270891836391_3552668677856461482_n.jpg', description: 'Khung viền tròn bo màu xanh rêu trong suốt kết hợp cầu nối kim loại mảnh nhẹ, đệm mũi linh hoạt.' },
+            { id: 20, name: 'Kính Râm Polarized Xám Khói Trong Bản Vuông Góc Cạnh', sku: 'GLR-759299', category: 'Kính râm', brand: 'GLORISS', price: 1250000, sale_price: 950000, stock: 14, gender: 'Unisex', shape: 'Vuông', material: 'Acetate xám trong (Crystal Grey)', image: '759299636_1352447557085391_2432466037728208150_n.jpg', description: 'Khung nhựa xám khói hiện đại, lộ cốt kim loại tinh xảo ở càng kính phối tròng chống UV400.' },
+            { id: 21, name: 'Kính Râm Vuông Đen Bản Dày Phối Tròng Đen Đậm Chống Chói', sku: 'GLR-762737', category: 'Kính râm', brand: 'GLORISS', price: 1250000, sale_price: 950000, stock: 18, gender: 'Unisex', shape: 'Vuông', material: 'Acetate cao cấp đen bóng', image: '762737488_1352447820418698_6228967226641414234_n.jpg', description: 'Form vuông to bản mạnh mẽ, mắt kính phân cực giảm chói lóa tối ưu khi lái xe dưới trời nắng.' },
+            { id: 22, name: 'Kính Râm Dáng Vuông Vát Nhẹ Xám Khói Trong Suốt', sku: 'GLR-762831', category: 'Kính râm', brand: 'GLORISS', price: 1250000, sale_price: 950000, stock: 16, gender: 'Unisex', shape: 'Vuông', material: 'Acetate xám trong suốt', image: '762831273_1352447540418726_7607216540267278281_n.jpg', description: 'Gọng xám trong suốt thanh lịch, form kính vuông vắn sắc nét, tròng râm bảo vệ mắt hoàn hảo.' },
+            { id: 23, name: 'Kính Râm Vuông Vát Góc Nhựa Xanh Rêu Khói Trong Suốt', sku: 'GLR-762868', category: 'Kính râm', brand: 'GLORISS', price: 1250000, sale_price: 950000, stock: 12, gender: 'Unisex', shape: 'Vuông', material: 'Acetate rêu khói trong suốt', image: '762868452_1352447787085368_8272071967529265599_n.jpg', description: 'Sắc xanh rêu khói thời thượng, gọng kính dày dặn chắc chắn cùng tròng kính tối màu chống tia UV.' },
+            { id: 24, name: 'Gọng Kính Titan Vuông Cầu Đôi Bạc Xám Mờ Siêu Nhẹ', sku: 'GLR-772510', category: 'Kính cận', brand: 'GLORISS', price: 1350000, sale_price: 1100000, stock: 15, gender: 'Unisex', shape: 'Phi công', material: 'Titanium nguyên chất mạ xám mờ', image: '772510820_1362762376053909_5767418507290829153_n.jpg', description: 'Thiết kế cầu đôi hiện đại, chất liệu Titanium siêu nhẹ không gây hằn sống mũi hay dị ứng da.' },
+            { id: 25, name: 'Gọng Kính Nửa Viền 20505 Xám Khói Trong Suốt 53-18-148', sku: 'GLR-794394', category: 'Kính cận', brand: 'GLORISS', price: 980000, sale_price: 760000, stock: 22, gender: 'Unisex', shape: 'Vuông', material: 'Acetate xám trong phối kim loại bạc', image: '794394853_1398320849164728_2387411871696708915_n.jpg', description: 'Model 20505 dáng nửa viền thanh lịch phối giữa tông xám khói trong suốt và khung kim loại bạc.' },
+            { id: 26, name: 'Gọng Kính Nửa Viền 20505 Đen Toàn Phần Lịch Lãm 53-18-148', sku: 'GLR-795643', category: 'Kính cận', brand: 'GLORISS', price: 980000, sale_price: 760000, stock: 20, gender: 'Nam', shape: 'Vuông', material: 'Acetate đen phối kim loại đen', image: '795643990_1398320765831403_3288893341388816612_n.jpg', description: 'Model 20505 phối màu full black chững chạc, phù hợp quý ông công sở và văn phòng.' },
+            { id: 27, name: 'Kính Râm Gọng Đen Bản Dày Tròng Vàng Hổ Phách Càng Ngôi Sao', sku: 'GLR-796584', category: 'Kính râm', brand: 'GLORISS', price: 1350000, sale_price: 1050000, stock: 12, gender: 'Unisex', shape: 'Vuông', material: 'Acetate đen bóng phối đinh tán sao', image: '796584961_1385467357116744_5832212391803403730_n.jpg', description: 'Dáng mắt vuông vát góc, càng kính đính ngôi sao kim loại nổi bật phối cùng tròng vàng hổ phách dịu mắt.' },
+            { id: 28, name: 'Kính Râm Gọng Đen Phối Tròng Gradient Cam Đào Trẻ Trung', sku: 'GLR-796746', category: 'Kính râm', brand: 'GLORISS', price: 1350000, sale_price: 1050000, stock: 14, gender: 'Unisex', shape: 'Vuông', material: 'Acetate đen bóng cao cấp', image: '796746885_1385467347116745_316312356467901797_n.jpg', description: 'Tròng kính màu cam gradient sành điệu, kết hợp gọng đen bóng thời thượng và bắt mắt.' },
+            { id: 29, name: 'Kính Râm Xám Khói Trong Suốt Càng Đính Ngôi Sao Kim Loại', sku: 'GLR-796866', category: 'Kính râm', brand: 'GLORISS', price: 1350000, sale_price: 1050000, stock: 15, gender: 'Unisex', shape: 'Vuông', material: 'Acetate xám trong (Crystal Grey)', image: '796866880_1385467350450078_5060038200924945573_n.jpg', description: 'Gọng nhựa trong suốt tông xám khói, tròng râm đen đậm tạo cảm giác phóng khoáng, hiện đại.' },
+            { id: 30, name: 'Kính Râm Form Vuông Đen Bóng Phối Tròng Đen Đậm Chống UV', sku: 'GLR-797841', category: 'Kính râm', brand: 'GLORISS', price: 1350000, sale_price: 1050000, stock: 16, gender: 'Unisex', shape: 'Vuông', material: 'Acetate cao cấp đen bóng', image: '797841455_1385467337116746_1272003281430880047_n.jpg', description: 'Dáng kính râm đen cổ điển không bao giờ lỗi thời, càng kính đính họa tiết kim loại ánh bạc sắc sảo.' },
+            { id: 31, name: 'Gọng Kính Nửa Viền 20505 Đen Phối Kim Loại Rose Gold 53-18-148', sku: 'GLR-800924', category: 'Kính cận', brand: 'GLORISS', price: 1050000, sale_price: 820000, stock: 18, gender: 'Unisex', shape: 'Vuông', material: 'Acetate đen phối kim loại vàng hồng', image: '800924839_1398320762498070_3731222333175860759_n.jpg', description: 'Model 20505 nổi bật với sự phối hợp giữa viền nhựa đen bóng và khung kim loại vàng hồng sang trọng.' }
         ];
 
-        // 2. STATE & AUTO SYNC SEED
-        let cachedProducts = JSON.parse(localStorage.getItem('optilux_products'));
-        // Tự động nạp bộ 16 sản phẩm nếu bộ nhớ tạm đang rỗng hoặc chỉ có 4 sản phẩm cũ
-        if (!cachedProducts || cachedProducts.length <= 4) {
-            cachedProducts = INITIAL_PRODUCTS;
-            localStorage.setItem('optilux_products', JSON.stringify(cachedProducts));
+        function getStoredProducts() {
+            try {
+                const stored = localStorage.getItem('gloriss_products');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                }
+            } catch(e) {}
+            return [...INITIAL_PRODUCTS];
+        }
+
+        function getStoredUsers() {
+            try {
+                const local = localStorage.getItem('gloriss_users');
+                if (local) {
+                    const parsed = JSON.parse(local);
+                    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                }
+            } catch(e) {}
+            return [...INITIAL_USERS];
         }
 
         let state = {
-            currentUser: JSON.parse(localStorage.getItem('optilux_currentUser')) || null,
-            users: JSON.parse(localStorage.getItem('optilux_users')) || INITIAL_USERS,
-            products: cachedProducts,
-            cart: JSON.parse(localStorage.getItem('optilux_cart')) || [],
-            orders: JSON.parse(localStorage.getItem('optilux_orders')) || [
+            currentUser: JSON.parse(localStorage.getItem('gloriss_currentUser')) || null,
+            users: getStoredUsers(),
+            products: getStoredProducts(),
+            cart: JSON.parse(localStorage.getItem('gloriss_cart')) || [],
+            orders: JSON.parse(localStorage.getItem('gloriss_orders')) || [
                 {
                     id: 101,
                     customer: 'Nguyễn Văn An',
                     email: 'customer@gmail.com',
                     phone: '0912345678',
-                    address: 'Số 10 Phố Huế, Hoàn Kiếm, Hà Nội',
-                    total: 980000,
+                    address: 'Số 10 Phố Huế, Phường Hàng Gai, Quận Hoàn Kiếm, Hà Nội',
+                    total: 820000,
+                    paymentMethod: 'COD',
+                    couponApplied: 'KINH10',
                     status: 'Đang giao',
-                    createdAt: '03/10/2026 14:30',
-                    items: [{ name: 'Kính Cận Aviator Classic Titanium', qty: 1, price: 950000 }]
+                    createdAt: '05/10/2026 14:30',
+                    items: [{ id: 31, name: 'Gọng Kính Nửa Viền 20505 Đen Phối Kim Loại Rose Gold', qty: 1, price: 820000 }]
                 }
             ],
+            sqlLogs: JSON.parse(localStorage.getItem('gloriss_sql_logs')) || [
+                "-- Hệ thống khởi động thành công",
+                "SELECT * FROM products WHERE is_deleted = 0 ORDER BY id DESC;",
+                "SELECT * FROM vouchers WHERE is_active = 1;"
+            ],
             currentPage: 'home',
-            discountRate: 0,
+            appliedCoupon: null,
+            selectedPaymentMethod: 'COD',
             activeFilters: { category: '', shape: '', gender: '', priceRange: '', search: '', sort: '' },
             selectedProductId: null
         };
 
+        function logSQL(query) {
+            const time = new Date().toLocaleTimeString('vi-VN');
+            const logEntry = `[${time}] ${query}`;
+            state.sqlLogs.unshift(logEntry);
+            if (state.sqlLogs.length > 50) state.sqlLogs.pop();
+            localStorage.setItem('gloriss_sql_logs', JSON.stringify(state.sqlLogs));
+            const term = document.getElementById('sqlTerminalView');
+            if (term) {
+                term.innerHTML = state.sqlLogs.map(l => `<div>${escapeHtml(l)}</div>`).join('');
+            }
+        }
+
+        function escapeHtml(text) {
+            return (text || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
         function saveData() {
-            localStorage.setItem('optilux_users', JSON.stringify(state.users));
-            localStorage.setItem('optilux_products', JSON.stringify(state.products));
-            localStorage.setItem('optilux_cart', JSON.stringify(state.cart));
-            localStorage.setItem('optilux_orders', JSON.stringify(state.orders));
-            localStorage.setItem('optilux_currentUser', JSON.stringify(state.currentUser));
+            try {
+                localStorage.setItem('gloriss_users', JSON.stringify(state.users));
+                localStorage.setItem('gloriss_products', JSON.stringify(state.products));
+                localStorage.setItem('gloriss_cart', JSON.stringify(state.cart));
+                localStorage.setItem('gloriss_orders', JSON.stringify(state.orders));
+                if (state.currentUser) {
+                    localStorage.setItem('gloriss_currentUser', JSON.stringify(state.currentUser));
+                } else {
+                    localStorage.removeItem('gloriss_currentUser');
+                }
+            } catch (err) {
+                console.error("Lỗi khi lưu LocalStorage:", err);
+            }
             updateCartBadge();
             renderAuthNav();
         }
 
         function updateCartBadge() {
-            const count = state.cart.reduce((sum, item) => sum + item.quantity, 0);
+            const count = (state.cart || []).reduce((sum, item) => sum + item.quantity, 0);
             const badge = document.getElementById('cartCountBadge');
             if (badge) badge.innerText = count;
         }
@@ -391,71 +418,271 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             `;
-            setTimeout(() => { container.innerHTML = ''; }, 3500);
+            setTimeout(() => { 
+                const el = document.getElementById('flashAlert');
+                if (el) el.remove(); 
+            }, 4500);
         }
 
         function formatMoney(num) {
-            return new Intl.NumberFormat('vi-VN').format(num) + 'đ';
+            return new Intl.NumberFormat('vi-VN').format(Math.max(0, num || 0)) + 'đ';
         }
 
-        // 3. NAVIGATION
-        function navTo(page, param = null) {
-            if (page.startsWith('admin') && (!state.currentUser || state.currentUser.role !== 'admin')) {
-                showAlert('Bạn cần đăng nhập tài khoản Quản trị viên để truy cập!', 'danger');
-                state.currentPage = 'login';
-                render();
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'Chờ xác nhận': return 'bg-warning text-dark';
+                case 'Đã xác nhận': return 'bg-primary text-white';
+                case 'Đang chuẩn bị': return 'bg-info text-dark';
+                case 'Đang giao': return 'bg-primary text-white';
+                case 'Đã giao': return 'bg-success text-white';
+                case 'Đã hủy': return 'bg-danger text-white';
+                default: return 'bg-secondary text-white';
+            }
+        }
+
+        function calculateOrderTotals() {
+            const subtotal = (state.cart || []).reduce((s, i) => s + i.price * i.quantity, 0);
+            let shipping = subtotal > 0 ? 30000 : 0;
+            let discount = 0;
+
+            if (state.appliedCoupon && subtotal > 0) {
+                if (state.appliedCoupon.type === 'percent') {
+                    discount = Math.round(subtotal * state.appliedCoupon.value);
+                } else if (state.appliedCoupon.type === 'fixed') {
+                    discount = Math.min(subtotal, state.appliedCoupon.value);
+                } else if (state.appliedCoupon.type === 'freeship') {
+                    discount = shipping;
+                }
+            }
+
+            const finalShipping = (state.appliedCoupon?.type === 'freeship') ? 0 : shipping;
+            const total = Math.max(0, subtotal - discount + finalShipping);
+            return { subtotal, discount, shipping: finalShipping, total };
+        }
+
+        // HỆ THỐNG XÁC THỰC VOUCHER THEO ĐIỀU KIỆN SẢN PHẨM & CẤP ĐỘ GIÁ TIỀN
+        function applyCoupon(customCode = null) {
+            let code = customCode;
+            if (!code) {
+                const input = document.getElementById('couponInput');
+                if (input) code = input.value.trim().toUpperCase();
+            }
+
+            if (!code) {
+                showAlert('Vui lòng nhập mã giảm giá!', 'warning');
                 return;
             }
 
-            state.currentPage = page;
-            if (page === 'detail') state.selectedProductId = param;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const coupon = AVAILABLE_COUPONS[code];
+            if (!coupon) {
+                showAlert(`Mã giảm giá "<strong>${code}</strong>" không tồn tại trong hệ thống!`, 'danger');
+                return;
+            }
+
+            const subtotal = (state.cart || []).reduce((s, i) => s + i.price * i.quantity, 0);
+            if (subtotal === 0) {
+                showAlert('Giỏ hàng trống, không thể áp dụng voucher!', 'warning');
+                return;
+            }
+
+            // 1. Kiểm tra đơn hàng tối thiểu
+            if (coupon.minOrder && subtotal < coupon.minOrder) {
+                showAlert(`Mã <strong>${code}</strong> yêu cầu giá trị đơn hàng tối thiểu từ <strong>${formatMoney(coupon.minOrder)}</strong>!`, 'warning');
+                return;
+            }
+
+            // 2. Kiểm tra điều kiện sản phẩm cao cấp (minProductPrice)
+            if (coupon.minProductPrice && coupon.minProductPrice > 0) {
+                const hasPremium = state.cart.some(item => item.price >= coupon.minProductPrice);
+                if (!hasPremium) {
+                    showAlert(`Voucher <strong>${code}</strong> là mã đặc quyền dành cho sản phẩm cao cấp từ <strong>${formatMoney(coupon.minProductPrice)}</strong> trở lên trong giỏ hàng!`, 'danger');
+                    return;
+                }
+            }
+
+            // 3. Kiểm tra sản phẩm được chỉ định riêng biệt (applicableIds)
+            if (coupon.applicableIds && Array.isArray(coupon.applicableIds)) {
+                const hasSpecific = state.cart.some(item => coupon.applicableIds.includes(item.id));
+                if (!hasSpecific) {
+                    showAlert(`Mã <strong>${code}</strong> chỉ áp dụng riêng cho một số dòng kính mắt được chỉ định (như Gọng Titanium #8, #24)!`, 'warning');
+                    return;
+                }
+            }
+
+            // Áp dụng thành công
+            state.appliedCoupon = { code, ...coupon };
+            logSQL(`-- Kiểm tra & Áp dụng Voucher thành công\nSELECT * FROM vouchers WHERE code = '${code}' AND min_order_total <= ${subtotal};`);
+            showAlert(`Đã áp dụng thành công voucher <strong>${code}</strong>: ${coupon.label}!`, 'success');
             render();
         }
 
-        function filterCategory(cat) {
-            state.activeFilters.category = cat;
-            navTo('products');
+        function removeCoupon() {
+            state.appliedCoupon = null;
+            showAlert('Đã hủy áp dụng mã giảm giá.', 'info');
+            render();
         }
 
-        function handleSearch(e) {
-            if (e.key === 'Enter') triggerSearch();
-        }
+        function setPaymentMethod(method) {
+            state.selectedPaymentMethod = method;
+            document.querySelectorAll('.payment-box').forEach(el => el.classList.remove('active'));
+            const activeEl = document.getElementById(`box_${method}`);
+            if (activeEl) activeEl.classList.add('active');
 
-        function triggerSearch() {
-            const val = document.getElementById('searchInput').value.trim();
-            state.activeFilters.search = val;
-            navTo('products');
-        }
-
-        // 4. AUTHENTICATION HANDLERS
-        function handleLogin(e) {
-            e.preventDefault();
-            const form = e.target;
-            const email = form.email.value.trim().toLowerCase();
-            const password = form.password.value;
-
-            const user = state.users.find(u => u.email.toLowerCase() === email && u.password === password);
-
-            if (user) {
-                state.currentUser = { id: user.id, fullname: user.fullname, email: user.email, phone: user.phone, role: user.role };
-                saveData();
-                showAlert(`Đăng nhập thành công! Chào mừng <strong>${user.fullname}</strong>.`, 'success');
-                if (user.role === 'admin') {
-                    navTo('admin-dashboard');
+            const infoEl = document.getElementById('paymentExtraInfo');
+            const { total } = calculateOrderTotals();
+            if (infoEl) {
+                if (method === 'BANK') {
+                    infoEl.innerHTML = `
+                        <div class="p-3 bg-light rounded border border-primary-subtle small mt-2">
+                            <div class="fw-bold text-primary mb-1"><i class="bi bi-bank me-1"></i> Thông tin chuyển khoản VietQR:</div>
+                            <div>- Ngân hàng: <strong>MBBank (Ngân Hàng Quân Đội)</strong></div>
+                            <div>- Số tài khoản: <strong>999988886868</strong></div>
+                            <div>- Chủ tài khoản: <strong>GLORISS EYEWEAR STORE</strong></div>
+                            <div>- Số tiền: <strong class="text-danger">${formatMoney(total)}</strong></div>
+                            <div>- Cú pháp CK: <strong>GLORISS [Số điện thoại nhận]</strong></div>
+                        </div>
+                    `;
+                } else if (method === 'MOMO') {
+                    infoEl.innerHTML = `
+                        <div class="p-3 bg-light rounded border border-danger-subtle small mt-2">
+                            <div class="fw-bold text-danger mb-1"><i class="bi bi-phone me-1"></i> Quét mã Ví MoMo:</div>
+                            <div>- Số ví MoMo: <strong>0988 888 888</strong></div>
+                            <div>- Người nhận: <strong>GLORISS OFFICIAL</strong></div>
+                            <div>- Lời nhắn: <strong>Kính mắt GLORISS [Tên bạn]</strong></div>
+                        </div>
+                    `;
                 } else {
-                    navTo('home');
+                    infoEl.innerHTML = '';
                 }
-            } else {
-                showAlert('Email hoặc mật khẩu không chính xác!', 'danger');
             }
         }
 
+        // ================= HÀM KIỂM TRA SỐ ĐIỆN THOẠI (CHO PHÉP NHẬP CHỮ ĐỂ KIỂM THỬ NHƯNG HIỂN THỊ THÔNG BÁO PHẢI NHẬP SỐ) =================
+        const VN_PHONE_REGEX = /^(03|05|07|08|09)[0-9]{8}$/;
+
+        function checkPhoneValidationDetail(rawPhone) {
+            const val = (rawPhone || '').trim();
+            if (!val) {
+                return { valid: false, errorType: 'empty', message: 'Vui lòng nhập số điện thoại!' };
+            }
+            // Kiểm tra nếu có chứa chữ cái hoặc ký tự đặc biệt (không phải số 0-9)
+            if (!/^[0-9]+$/.test(val)) {
+                return { 
+                    valid: false, 
+                    errorType: 'not_number', 
+                    message: 'Phải nhập số! Số điện thoại chỉ được phép nhập chữ số (0-9), không được nhập chữ cái hoặc ký tự đặc biệt.' 
+                };
+            }
+            // Kiểm tra đầu số nhà mạng Việt Nam (03, 05, 07, 08, 09)
+            if (!/^(03|05|07|08|09)/.test(val)) {
+                return { 
+                    valid: false, 
+                    errorType: 'invalid_prefix', 
+                    message: 'Đầu số không hợp lệ! Vui lòng nhập đúng đầu số nhà mạng Việt Nam (03, 05, 07, 08, 09).' 
+                };
+            }
+            // Kiểm tra độ dài đúng 10 chữ số
+            if (val.length !== 10) {
+                return { 
+                    valid: false, 
+                    errorType: 'invalid_length', 
+                    message: `Số điện thoại phải gồm đúng 10 chữ số (hiện tại bạn đang nhập ${val.length} số).` 
+                };
+            }
+            return { valid: true, errorType: null, message: 'Số điện thoại hợp lệ.' };
+        }
+
+        function handlePhoneRealtimeInput(inputEl, feedbackId, isStrict = false) {
+            if (!inputEl) return;
+            const val = inputEl.value;
+            const feedbackEl = feedbackId ? document.getElementById(feedbackId) : null;
+
+            if (!val || val.trim() === '') {
+                inputEl.classList.remove('is-invalid', 'is-valid');
+                if (feedbackEl) {
+                    feedbackEl.style.display = 'none';
+                    feedbackEl.innerText = '';
+                }
+                return;
+            }
+
+            // 1. Nếu người dùng gõ chữ cái hoặc ký tự đặc biệt -> thông báo "Phải nhập số!" ngay lập tức
+            if (!/^[0-9]+$/.test(val.trim())) {
+                inputEl.classList.add('is-invalid');
+                inputEl.classList.remove('is-valid');
+                if (feedbackEl) {
+                    feedbackEl.style.display = 'block';
+                    feedbackEl.className = 'invalid-feedback d-block fw-semibold';
+                    feedbackEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i>Phải nhập số! Số điện thoại không được chứa chữ cái hoặc ký tự đặc biệt.';
+                }
+                return;
+            }
+
+            // 2. Nếu chỉ nhập số nhưng sai đầu số nhà mạng VN (khi đã nhập từ 2 số trở lên hoặc khi rời ô/submit)
+            if ((val.trim().length >= 2 || isStrict) && !/^(03|05|07|08|09)/.test(val.trim())) {
+                inputEl.classList.add('is-invalid');
+                inputEl.classList.remove('is-valid');
+                if (feedbackEl) {
+                    feedbackEl.style.display = 'block';
+                    feedbackEl.className = 'invalid-feedback d-block fw-semibold';
+                    feedbackEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i>Đầu số không hợp lệ! Vui lòng nhập đầu số nhà mạng Việt Nam (03, 05, 07, 08, 09).';
+                }
+                return;
+            }
+
+            // 3. Nếu vượt quá 10 chữ số
+            if (val.trim().length > 10) {
+                inputEl.classList.add('is-invalid');
+                inputEl.classList.remove('is-valid');
+                if (feedbackEl) {
+                    feedbackEl.style.display = 'block';
+                    feedbackEl.className = 'invalid-feedback d-block fw-semibold';
+                    feedbackEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>Số điện thoại chỉ gồm 10 chữ số (hiện tại: ${val.trim().length} số).`;
+                }
+                return;
+            }
+
+            // 4. Nếu chưa đủ 10 số khi rời ô (onblur) hoặc khi bấm Đặt hàng/Đăng ký (isStrict = true)
+            if (isStrict && val.trim().length < 10) {
+                inputEl.classList.add('is-invalid');
+                inputEl.classList.remove('is-valid');
+                if (feedbackEl) {
+                    feedbackEl.style.display = 'block';
+                    feedbackEl.className = 'invalid-feedback d-block fw-semibold';
+                    feedbackEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i>Số điện thoại phải đủ 10 chữ số (hiện tại: ${val.trim().length} số).`;
+                }
+                return;
+            }
+
+            // 5. Nếu đủ 10 số và đúng đầu số VN
+            if (VN_PHONE_REGEX.test(val.trim())) {
+                inputEl.classList.remove('is-invalid');
+                inputEl.classList.add('is-valid');
+                if (feedbackEl) {
+                    feedbackEl.style.display = 'block';
+                    feedbackEl.className = 'valid-feedback d-block fw-semibold';
+                    feedbackEl.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Số điện thoại 10 số hợp lệ.';
+                }
+            } else {
+                // Đang gõ dở dưới 10 số và đúng đầu số
+                inputEl.classList.remove('is-invalid', 'is-valid');
+                if (feedbackEl) {
+                    feedbackEl.style.display = 'none';
+                    feedbackEl.innerText = '';
+                }
+            }
+        }
+
+        function validateVNPhone(phone) {
+            return checkPhoneValidationDetail(phone).valid;
+        }
+
+        // ================= XỬ LÝ ĐĂNG KÝ VÀ ĐĂNG NHẬP =================
         function handleRegister(e) {
             e.preventDefault();
             const form = e.target;
             const fullname = form.fullname.value.trim();
-            const email = form.email.value.trim().toLowerCase();
+            const email = form.email.value.trim();
             const phone = form.phone.value.trim();
             const password = form.password.value;
             const confirmPassword = form.confirm_password.value;
@@ -465,8 +692,30 @@
                 return;
             }
 
-            if (state.users.some(u => u.email.toLowerCase() === email)) {
-                showAlert('Email này đã được sử dụng. Vui lòng chọn email khác!', 'danger');
+            const phoneCheck = checkPhoneValidationDetail(phone);
+            if (!phoneCheck.valid) {
+                showAlert(phoneCheck.message, 'danger');
+                if (form.phone) {
+                    handlePhoneRealtimeInput(form.phone, 'registerPhoneFeedback', true);
+                    form.phone.focus();
+                }
+                return;
+            }
+
+            const cleanName = fullname.toLowerCase();
+            const cleanEmail = email.toLowerCase();
+
+            const existingUser = state.users.find(u => 
+                (u.email && u.email.toLowerCase() === cleanEmail) || 
+                (u.fullname && u.fullname.toLowerCase() === cleanName)
+            );
+
+            if (existingUser) {
+                if (existingUser.email && existingUser.email.toLowerCase() === cleanEmail) {
+                    showAlert('Email này đã được sử dụng. Vui lòng chọn email khác!', 'danger');
+                } else {
+                    showAlert('Họ tên tài khoản này đã được sử dụng. Vui lòng chọn tên khác!', 'danger');
+                }
                 return;
             }
 
@@ -482,14 +731,379 @@
             state.users.push(newUser);
             state.currentUser = { id: newUser.id, fullname: newUser.fullname, email: newUser.email, phone: newUser.phone, role: newUser.role };
             saveData();
-            showAlert('Tạo tài khoản thành công! Bạn đã được tự động đăng nhập.', 'success');
+
+            logSQL(`INSERT INTO users (fullname, email, phone, password_hash, role) VALUES ('${fullname}', '${email}', '${phone}', '***hash***', 'customer');`);
+            showAlert(`Chào mừng <strong>${newUser.fullname}</strong>! Bạn đã được đăng ký và tự động đăng nhập.`, 'success');
             navTo('home');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const form = e.target;
+            const loginIdentifier = form.login_id.value.trim().toLowerCase();
+            const password = form.password.value;
+
+            const user = state.users.find(u => 
+                ((u.email && u.email.toLowerCase() === loginIdentifier) || 
+                 (u.fullname && u.fullname.toLowerCase() === loginIdentifier)) && 
+                u.password === password
+            );
+
+            if (user) {
+                state.currentUser = { id: user.id, fullname: user.fullname, email: user.email, phone: user.phone, role: user.role };
+                saveData();
+                logSQL(`SELECT id, fullname, role FROM users WHERE (email = '${loginIdentifier}' OR fullname = '${loginIdentifier}') LIMIT 1;`);
+                showAlert(`Đăng nhập thành công! Chào mừng <strong>${user.fullname}</strong>.`, 'success');
+                if (user.role === 'admin') navTo('admin-dashboard');
+                else navTo('home');
+            } else {
+                showAlert('Tên đăng nhập (hoặc Email) hoặc Mật khẩu không chính xác!', 'danger');
+            }
         }
 
         function handleLogout() {
             state.currentUser = null;
             saveData();
             showAlert('Bạn đã đăng xuất khỏi hệ thống.', 'info');
+            navTo('home');
+        }
+
+        // ================= ADMIN CẬP NHẬT KHO & GIÁ TIỀN SẢN PHẨM =================
+        function openEditProductModal(id) {
+            if (!state.currentUser || state.currentUser.role !== 'admin') {
+                showAlert('Chỉ tài khoản Quản trị viên (Admin) mới có quyền sửa kho và giá!', 'danger');
+                return;
+            }
+            const prod = state.products.find(p => p.id === id);
+            if (!prod) return;
+
+            document.getElementById('editProdId').value = prod.id;
+            document.getElementById('editProdName').value = prod.name;
+            document.getElementById('editProdSku').value = prod.sku;
+            document.getElementById('editProdStock').value = prod.stock;
+            document.getElementById('editProdPrice').value = prod.price;
+            document.getElementById('editProdSalePrice').value = prod.sale_price !== null ? prod.sale_price : '';
+
+            const modal = new bootstrap.Modal(document.getElementById('editProductModal'));
+            modal.show();
+        }
+
+        function handleSaveProductInventory(e) {
+            e.preventDefault();
+            if (!state.currentUser || state.currentUser.role !== 'admin') {
+                showAlert('Quyền truy cập bị từ chối!', 'danger');
+                return;
+            }
+
+            const id = parseInt(document.getElementById('editProdId').value);
+            const stock = parseInt(document.getElementById('editProdStock').value);
+            const price = parseFloat(document.getElementById('editProdPrice').value);
+            const salePriceVal = document.getElementById('editProdSalePrice').value;
+            const salePrice = salePriceVal !== '' ? parseFloat(salePriceVal) : null;
+
+            if (salePrice !== null && salePrice >= price) {
+                showAlert('Giá khuyến mãi phải nhỏ hơn giá niêm yết!', 'warning');
+                return;
+            }
+
+            const prod = state.products.find(p => p.id === id);
+            if (prod) {
+                const oldStock = prod.stock;
+                const oldPrice = prod.price;
+                prod.stock = Math.max(0, stock);
+                prod.price = price;
+                prod.sale_price = salePrice;
+
+                saveData();
+
+                logSQL(`UPDATE products SET stock = ${prod.stock}, price = ${prod.price}, sale_price = ${prod.sale_price !== null ? prod.sale_price : 'NULL'} WHERE id = ${prod.id};`);
+                showAlert(`Đã cập nhật sản phẩm [${prod.sku}]! Tồn kho: ${oldStock} -> <strong>${prod.stock}</strong>, Giá: ${formatMoney(oldPrice)} -> <strong>${formatMoney(prod.price)}</strong>`, 'success');
+                render();
+
+                const modalEl = document.getElementById('editProductModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+        }
+
+        function handleCreateProduct(e) {
+            e.preventDefault();
+            if (!state.currentUser || state.currentUser.role !== 'admin') {
+                showAlert('Chỉ Quản trị viên mới có quyền thêm sản phẩm mới!', 'danger');
+                return;
+            }
+
+            const form = e.target;
+            const newSku = form.sku.value.trim().toUpperCase();
+
+            if (state.products.some(p => p.sku === newSku)) {
+                showAlert(`Mã SKU "${newSku}" đã tồn tại trong kho! Vui lòng chọn SKU khác.`, 'danger');
+                return;
+            }
+
+            const price = parseFloat(form.price.value);
+            const salePriceVal = form.sale_price.value;
+            const salePrice = salePriceVal ? parseFloat(salePriceVal) : null;
+
+            if (salePrice !== null && salePrice >= price) {
+                showAlert('Giá khuyến mãi phải nhỏ hơn giá niêm yết!', 'warning');
+                return;
+            }
+
+            const newP = {
+                id: Date.now(),
+                name: form.name.value.trim(),
+                sku: newSku,
+                category: form.category.value,
+                brand: form.brand.value.trim() || 'GLORISS',
+                price: price,
+                sale_price: salePrice,
+                stock: parseInt(form.stock.value) || 10,
+                shape: form.shape.value,
+                gender: form.gender.value,
+                material: form.material.value.trim(),
+                image: form.image.value.trim() || '525849748_1055378003459016_6785356181979024907_n.jpg',
+                description: form.description.value.trim()
+            };
+
+            state.products.unshift(newP);
+            saveData();
+
+            logSQL(`INSERT INTO products (sku, name, category, brand, price, sale_price, stock, shape, gender, material, image) VALUES ('${newP.sku}', '${newP.name}', '${newP.category}', '${newP.brand}', ${newP.price}, ${newP.sale_price !== null ? newP.sale_price : 'NULL'}, ${newP.stock}, '${newP.shape}', '${newP.gender}', '${newP.material}', '${newP.image}');`);
+            
+            const modalEl = document.getElementById('addProductModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            
+            showAlert(`Đã thêm thành công kính mắt mới: <strong>${newP.name}</strong> vào kho hàng!`, 'success');
+            render();
+        }
+
+        function deleteProduct(id) {
+            if (!state.currentUser || state.currentUser.role !== 'admin') {
+                showAlert('Chỉ Quản trị viên mới có quyền xóa sản phẩm!', 'danger');
+                return;
+            }
+            const prod = state.products.find(p => p.id === id);
+            if (!prod) return;
+
+            if (confirm(`Bạn chắc chắn muốn xóa kính [${prod.sku}] - "${prod.name}" khỏi hệ thống bán lẻ?`)) {
+                state.products = state.products.filter(p => p.id !== id);
+                saveData();
+                logSQL(`-- Soft-delete sản phẩm để lưu vết\nUPDATE products SET is_deleted = 1 WHERE id = ${id};`);
+                showAlert(`Đã xóa sản phẩm <strong>${prod.name}</strong> thành công!`, 'info');
+                render();
+            }
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            if (!state.currentUser || state.currentUser.role !== 'admin') {
+                showAlert('Chỉ tài khoản Quản trị viên mới có quyền đổi trạng thái đơn!', 'danger');
+                return;
+            }
+
+            const ord = state.orders.find(o => o.id === parseInt(orderId));
+            if (ord) {
+                const oldStatus = ord.status;
+                ord.status = newStatus;
+
+                // Nếu hủy đơn -> Hoàn lại tồn kho cho sản phẩm
+                if (newStatus === 'Đã hủy' && oldStatus !== 'Đã hủy') {
+                    ord.items.forEach(item => {
+                        const p = state.products.find(prod => prod.id === item.id);
+                        if (p) p.stock += item.qty;
+                    });
+                    logSQL(`-- Hoàn kho cho đơn bị hủy #${orderId}\nUPDATE products SET stock = stock + ? WHERE id = ?;`);
+                }
+
+                saveData();
+                logSQL(`UPDATE orders SET status = '${newStatus}' WHERE id = ${orderId};`);
+                showAlert(`Đã cập nhật trạng thái đơn <strong>#${orderId}</strong>: "${oldStatus}" -> "<strong>${newStatus}</strong>"!`, 'success');
+                render();
+            }
+        }
+
+        function openEditStatusModal(orderId) {
+            if (!state.currentUser || state.currentUser.role !== 'admin') {
+                showAlert('Bạn cần quyền Quản trị viên để thực hiện thao tác này!', 'danger');
+                return;
+            }
+
+            const ord = state.orders.find(o => o.id === parseInt(orderId));
+            if (!ord) return;
+
+            document.getElementById('modalOrderIdDisplay').innerText = ord.id;
+            document.getElementById('modalOrderIdInput').value = ord.id;
+            document.getElementById('modalStatusSelect').value = ord.status;
+
+            const itemsHtml = ord.items.map(i => `• ${i.name} (x${i.qty}): ${formatMoney(i.price * i.qty)}`).join('<br>');
+            document.getElementById('modalOrderDetails').innerHTML = `
+                <div><strong>Khách hàng:</strong> ${ord.customer} - ${ord.phone}</div>
+                <div><strong>Địa chỉ giao:</strong> ${ord.address}</div>
+                <div><strong>Phương thức thanh toán:</strong> <span class="badge bg-secondary">${ord.paymentMethod || 'COD'}</span></div>
+                <div><strong>Tổng tiền:</strong> <span class="text-danger fw-bold">${formatMoney(ord.total)}</span> ${ord.couponApplied ? `(Mã: <code>${ord.couponApplied}</code>)` : ''}</div>
+                <div class="mt-2 text-muted"><strong>Sản phẩm đặt:</strong><br>${itemsHtml}</div>
+            `;
+
+            const modal = new bootstrap.Modal(document.getElementById('orderStatusModal'));
+            modal.show();
+        }
+
+        function handleStatusFormSubmit(e) {
+            e.preventDefault();
+            const orderId = document.getElementById('modalOrderIdInput').value;
+            const newStatus = document.getElementById('modalStatusSelect').value;
+            updateOrderStatus(orderId, newStatus);
+            const modalEl = document.getElementById('orderStatusModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
+        // ================= KIỂM TRA ĐỊA CHỈ TỰ NHẬP & CHỐNG SPAM =================
+        function validateManualAddress(addr) {
+            const clean = addr.trim();
+            // 1. Kiểm tra độ dài tối thiểu (phải đủ thông tin chi tiết)
+            if (clean.length < 12) {
+                return { valid: false, message: 'Địa chỉ quá ngắn (tối thiểu 12 ký tự). Vui lòng nhập chi tiết số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố!' };
+            }
+
+            // 2. Kiểm tra chuỗi spam phím (VD: aaaaaa, 111111, asdfghjk)
+            const repeatedCharPattern = /(.)\1{4,}/;
+            if (repeatedCharPattern.test(clean)) {
+                return { valid: false, message: 'Địa chỉ chứa chuỗi ký tự lặp lại bất thường! Vui lòng nhập địa chỉ nhận hàng có thật.' };
+            }
+
+            // 3. Kiểm tra số lượng từ (phải có ít nhất 3 từ cấu thành địa chỉ thực)
+            const words = clean.split(/\s+/).filter(w => w.length > 0);
+            if (words.length < 3) {
+                return { valid: false, message: 'Vui lòng nhập rõ ràng địa chỉ bao gồm đầy đủ số nhà, đường, phường/xã và tỉnh/thành!' };
+            }
+
+            // 4. Kiểm tra có toàn số hoặc toàn ký tự đặc biệt hay không
+            if (/^[\d\s.,\-\/#]+$/.test(clean)) {
+                return { valid: false, message: 'Địa chỉ không thể chỉ gồm số và ký hiệu! Vui lòng nhập rõ tên đường, phường, quận và tỉnh/thành.' };
+            }
+
+            return { valid: true, cleanAddress: clean };
+        }
+
+        function handleCheckout(e) {
+            e.preventDefault();
+            const form = e.target;
+
+            // 1. CHỐNG SPAM: KIỂM TRA HONEYPOT
+            if (form.hp_website_check && form.hp_website_check.value !== '') {
+                console.warn("Spam Bot Detected by Honeypot!");
+                showAlert('Hệ thống phát hiện thao tác tự động bất thường. Đơn hàng bị từ chối!', 'danger');
+                return;
+            }
+
+            // 2. CHỐNG SPAM: RATE LIMITING (GIỚI HẠN TẦN SUẤT ĐẶT ĐƠN)
+            const now = Date.now();
+            const lastOrderTime = parseInt(localStorage.getItem('gloriss_last_order_ts') || '0');
+            if (now - lastOrderTime < 25000) { // Dưới 25 giây
+                const remainSec = Math.ceil((25000 - (now - lastOrderTime)) / 1000);
+                showAlert(`Hệ thống chống Spam: Bạn đang đặt hàng quá nhanh! Vui lòng chờ <strong>${remainSec} giây</strong> nữa để tiếp tục.`, 'warning');
+                return;
+            }
+
+            // 3. CHỐNG SPAM: KIỂM TRA SỐ ĐIỆN THOẠI (BÁO LỖI RÕ RÀNG NẾU NHẬP CHỮ, KÝ TỰ ĐẶC BIỆT HOẶC SAI ĐẦU SỐ VN)
+            const phone = form.phone.value.trim();
+            const phoneCheck = checkPhoneValidationDetail(phone);
+            if (!phoneCheck.valid) {
+                showAlert(phoneCheck.message, 'danger');
+                handlePhoneRealtimeInput(form.phone, 'checkoutPhoneFeedback', true);
+                form.phone.focus();
+                return;
+            }
+
+            // 4. KIỂM TRA ĐỊA CHỈ KHÁCH HÀNG TỰ NHẬP
+            const rawAddress = form.address.value;
+            const addressCheck = validateManualAddress(rawAddress);
+            if (!addressCheck.valid) {
+                showAlert(addressCheck.message, 'danger');
+                form.address.focus();
+                return;
+            }
+            const fullAddress = addressCheck.cleanAddress;
+
+            // 5. KIỂM TRA TỒN KHO TRƯỚC KHI TẠO ĐƠN
+            for (const c of state.cart) {
+                const p = state.products.find(prod => prod.id === c.id);
+                if (!p || p.stock < c.quantity) {
+                    showAlert(`Sản phẩm "<strong>${c.name}</strong>" chỉ còn ${p ? p.stock : 0} chiếc trong kho, không đủ số lượng bạn yêu cầu!`, 'danger');
+                    return;
+                }
+            }
+
+            const { subtotal, discount, shipping, total } = calculateOrderTotals();
+
+            let paymentMethodName = 'COD (Tiền mặt)';
+            if (state.selectedPaymentMethod === 'BANK') paymentMethodName = 'Chuyển khoản VietQR';
+            if (state.selectedPaymentMethod === 'MOMO') paymentMethodName = 'Ví điện tử MoMo';
+
+            const newOrder = {
+                id: Math.floor(1000 + Math.random() * 9000),
+                customer: form.fullname.value.trim(),
+                email: form.email ? form.email.value.trim() : (state.currentUser ? state.currentUser.email : ''),
+                phone: phone,
+                address: fullAddress,
+                note: form.note.value.trim(),
+                total: total,
+                paymentMethod: paymentMethodName,
+                couponApplied: state.appliedCoupon ? state.appliedCoupon.code : null,
+                status: 'Chờ xác nhận',
+                createdAt: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}),
+                items: state.cart.map(c => ({ id: c.id, name: c.name, qty: c.quantity, price: c.price }))
+            };
+
+            // TRỪ HÀNG TỒN KHO (TƯƠNG ĐƯƠNG TRANSACTION SQL)
+            state.cart.forEach(c => {
+                const p = state.products.find(prod => prod.id === c.id);
+                if (p) p.stock = Math.max(0, p.stock - c.quantity);
+            });
+
+            // GHI LỊCH SỬ SQL TRANSACTION
+            logSQL(`-- BẮT ĐẦU TRANSACTION ĐẶT HÀNG #${newOrder.id}\nSTART TRANSACTION;\n` +
+                   state.cart.map(c => `UPDATE products SET stock = stock - ${c.quantity} WHERE id = ${c.id} AND stock >= ${c.quantity};`).join('\n') + 
+                   `\nINSERT INTO orders (id, customer_name, phone, address, total_amount, payment_method, status) VALUES (${newOrder.id}, '${newOrder.customer}', '${newOrder.phone}', '${escapeHtml(fullAddress)}', ${newOrder.total}, '${newOrder.paymentMethod}', 'Chờ xác nhận');\nCOMMIT;`);
+
+            state.orders.unshift(newOrder);
+            state.cart = [];
+            state.appliedCoupon = null;
+            localStorage.setItem('gloriss_last_order_ts', now.toString());
+            saveData();
+
+            navTo('order-success', newOrder.id);
+        }
+
+        // ================= ĐIỀU HƯỚNG VÀ VIEW SPA =================
+        function navTo(page, param = null) {
+            if (page.startsWith('admin') && (!state.currentUser || state.currentUser.role !== 'admin')) {
+                showAlert('Bạn cần đăng nhập tài khoản Quản trị viên (Admin) để vào trang quản trị!', 'danger');
+                state.currentPage = 'login';
+                render();
+                return;
+            }
+
+            state.currentPage = page;
+            if (page === 'detail') state.selectedProductId = param;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            render();
+        }
+
+        function filterCategory(cat) {
+            state.activeFilters.category = cat;
+            navTo('home');
+        }
+
+        function handleSearch(e) {
+            if (e.key === 'Enter') triggerSearch();
+        }
+
+        function triggerSearch() {
+            const val = document.getElementById('searchInput').value.trim();
+            state.activeFilters.search = val;
             navTo('home');
         }
 
@@ -509,12 +1123,12 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow">
                             ${state.currentUser.role === 'admin' ? `
-                                <li><a id="dropdownAdminLink" class="dropdown-item fw-bold text-primary cursor-pointer" onclick="navTo('admin-dashboard')"><i class="bi bi-speedometer2 me-2"></i>Trang Admin</a></li>
+                                <li><a class="dropdown-item fw-bold text-primary cursor-pointer" onclick="navTo('admin-dashboard')"><i class="bi bi-speedometer2 me-2"></i>Trang Quản trị Admin</a></li>
                                 <li><hr class="dropdown-divider"></li>
                             ` : ''}
-                            <li><a id="dropdownOrdersLink" class="dropdown-item cursor-pointer" onclick="navTo('orders')"><i class="bi bi-box-seam me-2"></i>Đơn mua của tôi</a></li>
+                            <li><a class="dropdown-item cursor-pointer" onclick="navTo('orders')"><i class="bi bi-box-seam me-2"></i>Đơn mua của tôi</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a id="dropdownLogoutLink" class="dropdown-item text-danger cursor-pointer" onclick="handleLogout()"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+                            <li><a class="dropdown-item text-danger cursor-pointer" onclick="handleLogout()"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
                         </ul>
                     </div>
                 `;
@@ -523,21 +1137,29 @@
                 roleIndicator.innerText = 'Chưa đăng nhập';
 
                 area.innerHTML = `
-                    <button id="btnOpenLogin" class="btn btn-outline-light btn-sm me-2" onclick="navTo('login')">Đăng nhập</button>
-                    <button id="btnOpenRegister" class="btn btn-primary btn-sm" onclick="navTo('register')">Đăng ký</button>
+                    <button class="btn btn-outline-light btn-sm me-2" onclick="navTo('login')">Đăng nhập</button>
+                    <button class="btn btn-primary btn-sm" onclick="navTo('register')">Đăng ký</button>
                 `;
             }
         }
 
-        // 5. GIỎ HÀNG & CHECKOUT
         function addToCart(productId, qty = 1) {
             const prod = state.products.find(p => p.id === productId);
             if (!prod) return;
+
+            if (prod.stock <= 0) {
+                showAlert(`Sản phẩm "${prod.name}" hiện đã hết hàng trong kho!`, 'danger');
+                return;
+            }
 
             const existing = state.cart.find(item => item.id === productId);
             const actualPrice = prod.sale_price ? prod.sale_price : prod.price;
 
             if (existing) {
+                if (existing.quantity + qty > prod.stock) {
+                    showAlert(`Chỉ còn ${prod.stock} chiếc trong kho! Không thể thêm quá số lượng tồn.`, 'warning');
+                    return;
+                }
                 existing.quantity += qty;
             } else {
                 state.cart.push({
@@ -555,6 +1177,13 @@
         function changeCartQty(id, delta) {
             const item = state.cart.find(i => i.id === id);
             if (!item) return;
+            const prod = state.products.find(p => p.id === id);
+
+            if (delta > 0 && prod && item.quantity + delta > prod.stock) {
+                showAlert(`Kho hàng chỉ còn ${prod.stock} chiếc!`, 'warning');
+                return;
+            }
+
             item.quantity += delta;
             if (item.quantity <= 0) {
                 state.cart = state.cart.filter(i => i.id !== id);
@@ -570,221 +1199,55 @@
             showAlert('Đã xóa sản phẩm khỏi giỏ hàng', 'warning');
         }
 
-        function applyCoupon() {
-            const input = document.getElementById('couponInput');
-            if (!input) return;
-            const code = input.value.trim().toUpperCase();
-            if (code === 'KINH10') {
-                state.discountRate = 0.10;
-                showAlert('Đã áp dụng mã giảm giá 10%!');
-            } else {
-                showAlert('Mã giảm giá không hợp lệ!', 'danger');
-            }
-            render();
-        }
-
-        function handleCheckout(e) {
-            e.preventDefault();
-            const form = e.target;
-            const subtotal = state.cart.reduce((s, i) => s + i.price * i.quantity, 0);
-            const discount = subtotal * state.discountRate;
-            const shipping = 30000;
-            const total = subtotal - discount + shipping;
-
-            const newOrder = {
-                id: Math.floor(1000 + Math.random() * 9000),
-                customer: form.fullname.value,
-                email: form.email ? form.email.value : (state.currentUser ? state.currentUser.email : ''),
-                phone: form.phone.value,
-                address: form.address.value,
-                note: form.note.value,
-                total: total,
-                status: 'Chờ xác nhận',
-                createdAt: new Date().toLocaleDateString('vi-VN') + ' ' + new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}),
-                items: [...state.cart]
-            };
-
-            state.cart.forEach(c => {
-                const p = state.products.find(prod => prod.id === c.id);
-                if (p) p.stock = Math.max(0, p.stock - c.quantity);
-            });
-
-            state.orders.unshift(newOrder);
-            state.cart = [];
-            state.discountRate = 0;
-            saveData();
-            navTo('order-success', newOrder.id);
-        }
-
-        // 6. ADMIN HANDLERS
-        function handleCreateProduct(e) {
-            e.preventDefault();
-            const form = e.target;
-            const newP = {
-                id: Date.now(),
-                name: form.name.value,
-                sku: form.sku.value,
-                category: form.category.value,
-                brand: form.brand.value,
-                price: parseFloat(form.price.value),
-                sale_price: form.sale_price.value ? parseFloat(form.sale_price.value) : null,
-                stock: parseInt(form.stock.value) || 10,
-                shape: form.shape.value,
-                gender: form.gender.value,
-                material: form.material.value,
-                image: form.image.value || 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600',
-                description: form.description.value
-            };
-            state.products.unshift(newP);
-            saveData();
-            const modalEl = document.getElementById('addProductModal');
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            if (modal) modal.hide();
-            showAlert('Đã thêm kính mới vào hệ thống kho!');
-            render();
-        }
-
-        function deleteProduct(id) {
-            if (confirm('Bạn chắc chắn muốn xóa kính này?')) {
-                state.products = state.products.filter(p => p.id !== id);
-                saveData();
-                showAlert('Đã xóa kính thành công!', 'info');
-                render();
-            }
-        }
-
-        function updateOrderStatus(orderId, newStatus) {
-            const ord = state.orders.find(o => o.id === orderId);
-            if (ord) {
-                ord.status = newStatus;
-                saveData();
-                showAlert(`Đã cập nhật đơn #${orderId} sang trạng thái: "${newStatus}"`);
-                render();
-            }
-        }
-
-        // 7. RENDER LOGIC
+        // ================= RENDER TOÀN BỘ GIAO DIỆN =================
         function render() {
             const app = document.getElementById('appView');
 
-            // 1. TRANG ĐĂNG NHẬP
-            if (state.currentPage === 'login') {
-                app.innerHTML = `
-                    <div class="container my-5">
-                        <div class="card auth-card border-0 shadow mx-auto p-4">
-                            <h3 class="fw-bold text-center mb-1">Đăng Nhập</h3>
-                            <p class="text-center text-muted small mb-4">Nhập tài khoản để quản lý đơn hàng & mua sắm</p>
-                            
-                            <form id="loginForm" onsubmit="handleLogin(event)">
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold">Email</label>
-                                    <input type="email" id="loginEmail" name="email" class="form-control" required placeholder="admin@optilux.vn hoặc customer@gmail.com">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold">Mật khẩu</label>
-                                    <input type="password" id="loginPassword" name="password" class="form-control" required placeholder="Nhập mật khẩu...">
-                                </div>
-                                <button type="submit" id="btnLoginSubmit" class="btn btn-warning w-100 fw-bold py-2 mb-3">Đăng Nhập Ngay</button>
-                                <div class="text-center small">
-                                    Chưa có tài khoản? <a href="javascript:void(0)" id="linkToRegister" class="fw-bold text-decoration-none" onclick="navTo('register')">Đăng ký thành viên</a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // 2. TRANG ĐĂNG KÝ
-            else if (state.currentPage === 'register') {
-                app.innerHTML = `
-                    <div class="container my-5">
-                        <div class="card auth-card border-0 shadow mx-auto p-4">
-                            <h3 class="fw-bold text-center mb-1">Tạo Tài Khoản</h3>
-                            <p class="text-center text-muted small mb-4">Trở thành thành viên OptiLux để nhận ưu đãi</p>
-                            
-                            <form id="registerForm" onsubmit="handleRegister(event)">
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold">Họ và tên *</label>
-                                    <input type="text" id="regFullname" name="fullname" class="form-control" required placeholder="Nguyễn Văn A">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold">Email *</label>
-                                    <input type="email" id="regEmail" name="email" class="form-control" required placeholder="user@gmail.com">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold">Số điện thoại *</label>
-                                    <input type="tel" id="regPhone" name="phone" class="form-control" required placeholder="0912345678">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold">Mật khẩu *</label>
-                                    <input type="password" id="regPassword" name="password" class="form-control" required placeholder="Tối thiểu 6 ký tự">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold">Xác nhận mật khẩu *</label>
-                                    <input type="password" id="regConfirmPassword" name="confirm_password" class="form-control" required placeholder="Nhập lại mật khẩu trên">
-                                </div>
-                                <button type="submit" id="btnRegisterSubmit" class="btn btn-primary w-100 fw-bold py-2 mb-3">Đăng Ký</button>
-                                <div class="text-center small">
-                                    Đã có tài khoản? <a href="javascript:void(0)" id="linkToLogin" class="fw-bold text-decoration-none" onclick="navTo('login')">Đăng nhập</a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // 3. TRANG CHỦ
-            else if (state.currentPage === 'home') {
-                app.innerHTML = `
-                    <div class="bg-secondary text-white py-5 text-center" style="background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=1600') center/cover;">
-                        <div class="container py-5">
-                            <span class="badge bg-warning text-dark px-3 py-2 fs-6 fw-bold mb-3">BỘ SƯU TẬP 2026</span>
-                            <h1 class="display-4 fw-bold">Khẳng Định Phong Cách Cùng OptiLux</h1>
-                            <p class="lead mb-4">Gọng Titan siêu nhẹ, tròng chống tia UV400 và ánh sáng xanh. Nhập mã <strong>KINH10</strong> để giảm ngay 10%.</p>
-                            <button id="btnHeroExplore" class="btn btn-warning btn-lg px-4 fw-bold" onclick="filterCategory('')">Khám phá sản phẩm</button>
-                        </div>
-                    </div>
-
-                    <div class="container my-5">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h3 class="fw-bold"><i class="bi bi-fire text-danger"></i> Sản phẩm bán chạy</h3>
-                            <button id="btnViewAllProducts" class="btn btn-link text-decoration-none" onclick="filterCategory('')">Xem tất cả <i class="bi bi-arrow-right"></i></button>
-                        </div>
-                        <div class="row g-4" id="homeProductList">
-                            ${state.products.slice(0, 8).map(p => renderProductCard(p)).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            // 4. TRANG SẢN PHẨM & BỘ LỌC
-            else if (state.currentPage === 'products') {
+            // 1. TRANG CHỦ & DANH SÁCH SẢN PHẨM
+            if (state.currentPage === 'home') {
                 let list = [...state.products];
                 const f = state.activeFilters;
 
                 if (f.category) list = list.filter(p => p.category === f.category);
                 if (f.shape) list = list.filter(p => p.shape === f.shape);
                 if (f.gender) list = list.filter(p => p.gender === f.gender);
-                if (f.search) list = list.filter(p => p.name.toLowerCase().includes(f.search.toLowerCase()) || p.brand.toLowerCase().includes(f.search.toLowerCase()));
+                if (f.search) list = list.filter(p => p.name.toLowerCase().includes(f.search.toLowerCase()) || p.brand.toLowerCase().includes(f.search.toLowerCase()) || p.sku.toLowerCase().includes(f.search.toLowerCase()));
 
-                if (f.priceRange === 'under_500') list = list.filter(p => p.price < 500000);
-                else if (f.priceRange === '500_1000') list = list.filter(p => p.price >= 500000 && p.price <= 1000000);
-                else if (f.priceRange === 'over_1000') list = list.filter(p => p.price > 1000000);
+                if (f.priceRange === 'under_500') list = list.filter(p => (p.sale_price || p.price) < 500000);
+                else if (f.priceRange === '500_1000') list = list.filter(p => (p.sale_price || p.price) >= 500000 && (p.sale_price || p.price) <= 1000000);
+                else if (f.priceRange === 'over_1000') list = list.filter(p => (p.sale_price || p.price) > 1000000);
 
                 if (f.sort === 'asc') list.sort((a,b) => (a.sale_price||a.price) - (b.sale_price||b.price));
                 if (f.sort === 'desc') list.sort((a,b) => (b.sale_price||b.price) - (a.sale_price||a.price));
 
                 app.innerHTML = `
-                    <div class="container my-4">
+                    <div class="bg-dark text-white py-5 text-center" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('762868452_1352447787085368_8272071967529265599_n.jpg') center/cover;">
+                        <div class="container py-4">
+                            <span class="badge bg-warning text-dark px-3 py-2 fs-6 fw-bold mb-3">BỘ SƯU TẬP GLORISS CHÍNH HÃNG 2026</span>
+                            <h1 class="display-5 fw-bold">Nâng Tầm Phong Cách Cùng GLORISS</h1>
+                            <p class="lead mb-3">Gọng kính cận Titan, Clubmaster và kính râm cao cấp chống UV400.</p>
+                            
+                            <div class="d-flex justify-content-center gap-2 flex-wrap mt-3">
+                                <span class="badge bg-light text-dark px-3 py-2 coupon-chip" onclick="applyCoupon('KINH10')" title="Nhấp để áp dụng">Mã: <strong>KINH10</strong> (-10%)</span>
+                                <span class="badge bg-light text-dark px-3 py-2 coupon-chip" onclick="applyCoupon('GIAM30K')" title="Nhấp để áp dụng">Mã: <strong>GIAM30K</strong> (-30k)</span>
+                                <span class="badge bg-light text-dark px-3 py-2 coupon-chip" onclick="applyCoupon('FREESHIP')" title="Nhấp để áp dụng">Mã: <strong>FREESHIP</strong></span>
+                                <span class="badge badge-premium px-3 py-2 coupon-chip" onclick="applyCoupon('VIP150K')" title="Dành cho kính >= 1tr">Mã VIP: <strong>VIP150K</strong> (-150k cho kính cao cấp)</span>
+                                <span class="badge badge-premium px-3 py-2 coupon-chip" onclick="applyCoupon('TITAN200')" title="Dành cho Titan #8,#24">Mã VIP: <strong>TITAN200</strong> (-200k)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="container my-5">
                         <div class="row">
+                            <!-- Bộ lọc -->
                             <div class="col-lg-3 mb-4">
-                                <div class="card border-0 shadow-sm p-3">
+                                <div class="card border-0 shadow-sm p-3 sticky-top" style="top: 80px;">
                                     <h5 class="fw-bold mb-3"><i class="bi bi-funnel"></i> Bộ lọc sản phẩm</h5>
                                     
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold">Danh mục</label>
                                         <select id="filterCategorySelect" class="form-select form-select-sm" onchange="state.activeFilters.category = this.value; render();">
-                                            <option value="" ${!f.category?'selected':''}>Tất cả danh mục</option>
+                                            <option value="" ${!f.category?'selected':''}>Tất cả danh mục (${state.products.length})</option>
                                             <option value="Kính cận" ${f.category==='Kính cận'?'selected':''}>Kính cận</option>
                                             <option value="Kính râm" ${f.category==='Kính râm'?'selected':''}>Kính râm</option>
                                             <option value="Kính thời trang" ${f.category==='Kính thời trang'?'selected':''}>Kính thời trang</option>
@@ -792,17 +1255,17 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label small fw-bold">Mức giá</label>
+                                        <label class="form-label small fw-bold">Khoảng giá</label>
                                         <select id="filterPriceSelect" class="form-select form-select-sm" onchange="state.activeFilters.priceRange = this.value; render();">
-                                            <option value="" ${!f.priceRange?'selected':''}>Tất cả mức giá</option>
+                                            <option value="" ${!f.priceRange?'selected':''}>Mọi mức giá</option>
                                             <option value="under_500" ${f.priceRange==='under_500'?'selected':''}>Dưới 500.000đ</option>
                                             <option value="500_1000" ${f.priceRange==='500_1000'?'selected':''}>500.000đ - 1.000.000đ</option>
-                                            <option value="over_1000" ${f.priceRange==='over_1000'?'selected':''}>Trên 1.000.000đ</option>
+                                            <option value="over_1000" ${f.priceRange==='over_1000'?'selected':''}>Cao cấp (Trên 1.000.000đ)</option>
                                         </select>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label small fw-bold">Kiểu dáng gọng</label>
+                                        <label class="form-label small fw-bold">Kiểu dáng</label>
                                         <select id="filterShapeSelect" class="form-select form-select-sm" onchange="state.activeFilters.shape = this.value; render();">
                                             <option value="" ${!f.shape?'selected':''}>Tất cả kiểu dáng</option>
                                             <option value="Vuông" ${f.shape==='Vuông'?'selected':''}>Vuông</option>
@@ -815,20 +1278,23 @@
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold">Giới tính</label>
                                         <select id="filterGenderSelect" class="form-select form-select-sm" onchange="state.activeFilters.gender = this.value; render();">
-                                            <option value="" ${!f.gender?'selected':''}>Mọi giới tính</option>
+                                            <option value="" ${!f.gender?'selected':''}>Tất cả</option>
+                                            <option value="Unisex" ${f.gender==='Unisex'?'selected':''}>Unisex</option>
                                             <option value="Nam" ${f.gender==='Nam'?'selected':''}>Nam</option>
                                             <option value="Nữ" ${f.gender==='Nữ'?'selected':''}>Nữ</option>
-                                            <option value="Unisex" ${f.gender==='Unisex'?'selected':''}>Unisex</option>
                                         </select>
                                     </div>
 
-                                    <button id="btnResetFilter" class="btn btn-outline-secondary btn-sm w-100" onclick="state.activeFilters = {category:'',shape:'',gender:'',priceRange:'',search:'',sort:''}; render();">Đặt lại bộ lọc</button>
+                                    <button id="btnResetFilter" class="btn btn-outline-secondary btn-sm w-100" onclick="state.activeFilters = {category:'',shape:'',gender:'',priceRange:'',search:'',sort:''}; render();">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Đặt lại bộ lọc
+                                    </button>
                                 </div>
                             </div>
 
+                            <!-- Lưới sản phẩm -->
                             <div class="col-lg-9">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span>Hiển thị: <strong id="productCount">${list.length}</strong> sản phẩm</span>
+                                    <h5 class="fw-bold mb-0">Sản phẩm (<span class="text-primary">${list.length}</span> mẫu)</h5>
                                     <div class="d-flex align-items-center">
                                         <span class="small me-2">Sắp xếp:</span>
                                         <button id="btnSortAsc" class="btn btn-sm btn-outline-dark me-1" onclick="state.activeFilters.sort='asc'; render();">Giá tăng</button>
@@ -836,8 +1302,13 @@
                                     </div>
                                 </div>
 
-                                <div class="row g-3" id="productsGrid">
-                                    ${list.length > 0 ? list.map(p => renderProductCard(p, 'col-md-4')).join('') : '<div class="col-12 py-5 text-center text-muted"><i class="bi bi-inbox fs-1"></i><p>Không tìm thấy sản phẩm phù hợp!</p></div>'}
+                                <div class="row g-4" id="productsGrid">
+                                    ${list.length > 0 ? list.map(p => renderProductCard(p, 'col-md-4')).join('') : `
+                                        <div class="col-12 py-5 text-center text-muted">
+                                            <i class="bi bi-inbox fs-1"></i>
+                                            <p class="mt-2">Không tìm thấy sản phẩm phù hợp!</p>
+                                        </div>
+                                    `}
                                 </div>
                             </div>
                         </div>
@@ -845,49 +1316,57 @@
                 `;
             }
 
-            // 5. TRANG CHI TIẾT SẢN PHẨM
+            // 2. CHI TIẾT SẢN PHẨM
             else if (state.currentPage === 'detail') {
                 const prod = state.products.find(p => p.id === state.selectedProductId);
-                if (!prod) return navTo('products');
+                if (!prod) return navTo('home');
 
                 app.innerHTML = `
                     <div class="container my-5">
                         <nav aria-label="breadcrumb" class="mb-4">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="javascript:void(0)" onclick="navTo('home')">Trang chủ</a></li>
-                                <li class="breadcrumb-item"><a href="javascript:void(0)" onclick="navTo('products')">${prod.category}</a></li>
-                                <li class="breadcrumb-item active" id="detailProductNameBreadcrumb">${prod.name}</li>
+                                <li class="breadcrumb-item"><a href="javascript:void(0)" onclick="filterCategory('${prod.category}')">${prod.category}</a></li>
+                                <li class="breadcrumb-item active">${prod.name}</li>
                             </ol>
                         </nav>
                         <div class="row g-5">
-                            <div class="col-md-6">
-                                <img id="detailProductImage" src="${prod.image}" class="img-fluid rounded-4 shadow-sm w-100" style="max-height: 420px; object-fit: cover;">
+                            <div class="col-md-6 text-center">
+                                <img src="${prod.image}" onerror="handleImgError(this, '${prod.image}', ${prod.id}, '${prod.name.replace(/'/g, "\'")}')" class="img-fluid rounded-4 shadow-sm w-100" style="max-height: 460px; object-fit: contain; background: #f8fafc;">
                             </div>
                             <div class="col-md-6">
                                 <span class="badge bg-warning text-dark mb-2">${prod.category}</span>
-                                <h2 class="fw-bold" id="detailProductName">${prod.name}</h2>
-                                <p class="text-muted">Mã SKU: <strong id="detailProductSku">${prod.sku}</strong> | Hãng: <strong id="detailProductBrand">${prod.brand}</strong></p>
+                                ${(prod.sale_price || prod.price) >= 1000000 ? `<span class="badge badge-premium mb-2 ms-1"><i class="bi bi-gem"></i> Dòng Cao Cấp (Được áp mã VIP)</span>` : ''}
+                                
+                                <h2 class="fw-bold">${prod.name}</h2>
+                                <p class="text-muted">Mã SKU: <strong>${prod.sku}</strong> | Thương hiệu: <strong>${prod.brand}</strong></p>
                                 
                                 <div class="my-3">
                                     ${prod.sale_price ? `
-                                        <span id="detailProductPrice" class="text-danger fw-bold fs-3">${formatMoney(prod.sale_price)}</span>
+                                        <span class="text-danger fw-bold fs-3">${formatMoney(prod.sale_price)}</span>
                                         <span class="text-muted text-decoration-line-through fs-5 ms-3">${formatMoney(prod.price)}</span>
-                                    ` : `<span id="detailProductPrice" class="text-primary fw-bold fs-3">${formatMoney(prod.price)}</span>`}
+                                    ` : `<span class="text-primary fw-bold fs-3">${formatMoney(prod.price)}</span>`}
                                 </div>
 
                                 <ul class="list-group list-group-flush my-4 border rounded-3">
                                     <li class="list-group-item d-flex justify-content-between"><span>Kiểu dáng gọng:</span> <strong>${prod.shape}</strong></li>
                                     <li class="list-group-item d-flex justify-content-between"><span>Chất liệu:</span> <strong>${prod.material}</strong></li>
                                     <li class="list-group-item d-flex justify-content-between"><span>Giới tính phù hợp:</span> <strong>${prod.gender}</strong></li>
-                                    <li class="list-group-item d-flex justify-content-between"><span>Tình trạng kho:</span> <strong id="detailProductStock" class="${prod.stock > 0 ? 'text-success' : 'text-danger'}">${prod.stock > 0 ? `Còn hàng (${prod.stock})` : 'Hết hàng'}</strong></li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Tình trạng kho hàng:</span> 
+                                        <strong class="${prod.stock > 0 ? 'text-success' : 'text-danger'}">
+                                            ${prod.stock > 0 ? `<i class="bi bi-check-circle"></i> Còn hàng (${prod.stock} chiếc)` : '<i class="bi bi-x-circle"></i> Hết hàng'}
+                                        </strong>
+                                    </li>
                                 </ul>
 
                                 <p class="text-secondary">${prod.description}</p>
 
                                 <div class="d-flex align-items-center gap-3 mt-4">
-                                    <button id="btnDetailAddToCart" class="btn btn-warning btn-lg px-4 fw-bold" onclick="addToCart(${prod.id}, 1)" ${prod.stock <= 0 ? 'disabled' : ''}>
-                                        <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ hàng
+                                    <button class="btn btn-warning btn-lg px-4 fw-bold" onclick="addToCart(${prod.id}, 1)" ${prod.stock <= 0 ? 'disabled' : ''}>
+                                        <i class="bi bi-cart-plus me-1"></i> ${prod.stock > 0 ? 'Thêm vào giỏ hàng' : 'Tạm hết hàng'}
                                     </button>
+                                    <button class="btn btn-outline-dark btn-lg" onclick="navTo('home')">Quay lại danh sách</button>
                                 </div>
                             </div>
                         </div>
@@ -895,12 +1374,10 @@
                 `;
             }
 
-            // 6. TRANG GIỎ HÀNG
+            // 3. GIỎ HÀNG
             else if (state.currentPage === 'cart') {
-                const subtotal = state.cart.reduce((s, i) => s + i.price * i.quantity, 0);
-                const discount = subtotal * state.discountRate;
-                const shipping = subtotal > 0 ? 30000 : 0;
-                const total = Math.max(0, subtotal - discount + shipping);
+                const { subtotal, discount, shipping, total } = calculateOrderTotals();
+                const hasPremium = state.cart.some(item => item.price >= 1000000);
 
                 app.innerHTML = `
                     <div class="container my-5">
@@ -910,7 +1387,7 @@
                                 <div class="col-lg-8">
                                     <div class="card border-0 shadow-sm">
                                         <div class="table-responsive">
-                                            <table class="table align-middle mb-0" id="cartTable">
+                                            <table class="table align-middle mb-0">
                                                 <thead class="table-light">
                                                     <tr>
                                                         <th>Kính mắt</th>
@@ -922,23 +1399,26 @@
                                                 </thead>
                                                 <tbody>
                                                     ${state.cart.map(item => `
-                                                        <tr id="cartRow_${item.id}">
+                                                        <tr>
                                                             <td>
                                                                 <div class="d-flex align-items-center">
-                                                                    <img src="${item.image}" width="50" height="50" class="rounded me-3 object-fit-cover">
-                                                                    <span class="fw-semibold">${item.name}</span>
+                                                                    <img src="${item.image}" onerror="handleImgError(this, '${item.image}', ${item.id}, '${item.name.replace(/'/g, "\'")}')" width="55" height="55" class="rounded me-3 object-fit-cover">
+                                                                    <div>
+                                                                        <span class="fw-semibold d-block">${item.name}</span>
+                                                                        ${item.price >= 1000000 ? `<span class="badge badge-premium" style="font-size:0.7rem;">Cao cấp</span>` : ''}
+                                                                    </div>
                                                                 </div>
                                                             </td>
                                                             <td>${formatMoney(item.price)}</td>
                                                             <td>
                                                                 <div class="d-flex align-items-center gap-2">
-                                                                    <button class="btn btn-outline-secondary btn-sm px-2 btn-qty-minus" onclick="changeCartQty(${item.id}, -1)">-</button>
-                                                                    <span class="cart-item-qty fw-bold">${item.quantity}</span>
-                                                                    <button class="btn btn-outline-secondary btn-sm px-2 btn-qty-plus" onclick="changeCartQty(${item.id}, 1)">+</button>
+                                                                    <button class="btn btn-outline-secondary btn-sm px-2" onclick="changeCartQty(${item.id}, -1)">-</button>
+                                                                    <span class="fw-bold">${item.quantity}</span>
+                                                                    <button class="btn btn-outline-secondary btn-sm px-2" onclick="changeCartQty(${item.id}, 1)">+</button>
                                                                 </div>
                                                             </td>
                                                             <td class="fw-bold">${formatMoney(item.price * item.quantity)}</td>
-                                                            <td><button class="btn btn-link text-danger p-0 btn-remove-item" onclick="removeCartItem(${item.id})"><i class="bi bi-trash"></i></button></td>
+                                                            <td><button class="btn btn-link text-danger p-0" onclick="removeCartItem(${item.id})"><i class="bi bi-trash"></i></button></td>
                                                         </tr>
                                                     `).join('')}
                                                 </tbody>
@@ -948,16 +1428,40 @@
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="card border-0 shadow-sm p-4">
-                                        <h5 class="fw-bold mb-3">Tóm tắt đơn hàng</h5>
-                                        <div class="input-group input-group-sm mb-3">
-                                            <input type="text" id="couponInput" class="form-control" placeholder="Mã giảm: KINH10">
-                                            <button id="btnApplyCoupon" class="btn btn-dark" onclick="applyCoupon()">Áp dụng</button>
+                                        <h5 class="fw-bold mb-3">Tóm tắt thanh toán</h5>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold">Mã khuyến mãi (Voucher)</label>
+                                            <div class="input-group">
+                                                <input type="text" id="couponInput" class="form-control text-uppercase" placeholder="Nhập mã voucher..." value="${state.appliedCoupon ? state.appliedCoupon.code : ''}">
+                                                <button class="btn btn-dark" onclick="applyCoupon()">Áp dụng</button>
+                                            </div>
+                                            
+                                            <div class="mt-2">
+                                                <small class="text-muted fw-bold d-block mb-1">Gợi ý mã hợp lệ:</small>
+                                                <div class="d-flex flex-wrap gap-1">
+                                                    <span class="badge bg-light text-dark border coupon-chip" onclick="applyCoupon('KINH10')">KINH10 (-10%)</span>
+                                                    <span class="badge bg-light text-dark border coupon-chip" onclick="applyCoupon('GIAM30K')">GIAM30K (-30k)</span>
+                                                    <span class="badge bg-light text-dark border coupon-chip" onclick="applyCoupon('FREESHIP')">FREESHIP</span>
+                                                    <span class="badge ${hasPremium ? 'badge-premium' : 'bg-light text-muted border'} coupon-chip" onclick="applyCoupon('VIP150K')" title="${hasPremium ? 'Đủ điều kiện áp dụng' : 'Cần có kính >= 1tr'}">VIP150K (-150k)</span>
+                                                    <span class="badge ${hasPremium ? 'badge-premium' : 'bg-light text-muted border'} coupon-chip" onclick="applyCoupon('TITAN200')">TITAN200 (-200k)</span>
+                                                </div>
+                                            </div>
+
+                                            ${state.appliedCoupon ? `
+                                                <div class="alert alert-success d-flex justify-content-between align-items-center py-2 px-3 mt-3 mb-0 small">
+                                                    <div><i class="bi bi-tag-fill me-1"></i> <strong>${state.appliedCoupon.code}</strong>: ${state.appliedCoupon.label}</div>
+                                                    <a href="javascript:void(0)" class="text-danger fw-bold text-decoration-none" onclick="removeCoupon()"><i class="bi bi-x-circle"></i> Bỏ</a>
+                                                </div>
+                                            ` : ''}
                                         </div>
-                                        <div class="d-flex justify-content-between mb-2"><span>Tạm tính:</span><span id="cartSubtotal">${formatMoney(subtotal)}</span></div>${discount > 0 ? `<div class="d-flex justify-content-between mb-2 text-success"><span>Giảm giá (10%):</span><span id="cartDiscount">-${formatMoney(discount)}</span></div>` : ''}
-                                        <div class="d-flex justify-content-between mb-2"><span>Phí vận chuyển:</span><span id="cartShipping">${formatMoney(shipping)}</span></div>
+
+                                        <div class="d-flex justify-content-between mb-2"><span>Tạm tính:</span><span>${formatMoney(subtotal)}</span></div>
+                                        ${discount > 0 ? `<div class="d-flex justify-content-between mb-2 text-success"><span>Giảm giá (${state.appliedCoupon.code}):</span><span>-${formatMoney(discount)}</span></div>` : ''}
+                                        <div class="d-flex justify-content-between mb-2"><span>Phí vận chuyển:</span><span>${shipping === 0 ? '<span class="text-success fw-bold">Miễn phí</span>' : formatMoney(shipping)}</span></div>
                                         <hr>
-                                        <div class="d-flex justify-content-between mb-4"><span class="fw-bold fs-5">Tổng tiền:</span><span id="cartTotal" class="fw-bold fs-5 text-danger">${formatMoney(total)}</span></div>
-                                        <button id="btnProceedCheckout" class="btn btn-warning fw-bold w-100 py-2" onclick="navTo('checkout')">Tiến hành đặt hàng</button>
+                                        <div class="d-flex justify-content-between mb-4"><span class="fw-bold fs-5">Tổng tiền:</span><span class="fw-bold fs-5 text-danger">${formatMoney(total)}</span></div>
+                                        <button class="btn btn-warning fw-bold w-100 py-2" onclick="navTo('checkout')">Tiến hành đặt hàng</button>
                                     </div>
                                 </div>
                             </div>
@@ -965,70 +1469,102 @@
                             <div class="text-center py-5">
                                 <i class="bi bi-cart-x fs-1 text-muted"></i>
                                 <p class="lead text-muted mt-2">Giỏ hàng của bạn đang trống</p>
-                                <button id="btnEmptyCartExplore" class="btn btn-warning fw-bold" onclick="navTo('products')">Khám phá sản phẩm ngay</button>
+                                <button class="btn btn-warning fw-bold" onclick="navTo('home')">Xem bộ sưu tập ngay</button>
                             </div>
                         `}
                     </div>
                 `;
             }
 
-            // 7. TRANG ĐẶT HÀNG (CHECKOUT)
+            // 4. TRANG CHECKOUT (ĐẶT HÀNG - KHÁCH HÀNG TỰ NHẬP ĐỊA CHỈ & HỆ THỐNG KIỂM TRA CHỐNG SPAM)
             else if (state.currentPage === 'checkout') {
-                const subtotal = state.cart.reduce((s, i) => s + i.price * i.quantity, 0);
-                const discount = subtotal * state.discountRate;
-                const shipping = 30000;
-                const total = subtotal - discount + shipping;
+                const { subtotal, discount, shipping, total } = calculateOrderTotals();
 
                 app.innerHTML = `
                     <div class="container my-5">
                         <div class="row g-5">
                             <div class="col-md-7">
-                                <h4 class="fw-bold mb-3"><i class="bi bi-geo-alt"></i> Thông tin giao nhận kính</h4>
+                                <h4 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-warning me-2"></i>Thông tin nhận hàng & Địa chỉ giao</h4>
+                                <div class="alert alert-secondary py-2 small mb-4">
+                                    <i class="bi bi-shield-check text-success me-1"></i> Hệ thống đã kích hoạt <strong>Bộ lọc chống spam đơn ảo</strong> và <strong>Kiểm tra địa chỉ giao hàng hợp lệ</strong>.
+                                </div>
+
                                 <form id="checkoutForm" onsubmit="handleCheckout(event)">
+                                    <!-- HONEYPOT TRAP (Chống Bot tự động spam) -->
+                                    <input type="text" name="hp_website_check" class="honeypot-field" tabindex="-1" autocomplete="off">
+
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold">Họ và tên người nhận *</label>
-                                        <input type="text" id="inputFullname" name="fullname" class="form-control" required value="${state.currentUser ? state.currentUser.fullname : ''}" placeholder="Nguyễn Văn A">
+                                        <input type="text" name="fullname" class="form-control" required value="${state.currentUser ? state.currentUser.fullname : ''}" placeholder="Ví dụ: Nguyễn Văn An">
                                     </div>
+
                                     <div class="row mb-3">
                                         <div class="col-md-6">
                                             <label class="form-label small fw-bold">Số điện thoại nhận hàng *</label>
-                                            <input type="tel" id="inputPhone" name="phone" class="form-control" required value="${state.currentUser ? state.currentUser.phone : ''}" placeholder="0912345678">
+                                            <input type="text" id="checkoutPhone" name="phone" class="form-control" required autocomplete="tel" value="${(state.currentUser && state.currentUser.phone) ? state.currentUser.phone : ''}" placeholder="0912345678" oninput="handlePhoneRealtimeInput(this, 'checkoutPhoneFeedback')" onblur="handlePhoneRealtimeInput(this, 'checkoutPhoneFeedback', true)" title="Số điện thoại gồm 10 chữ số, bắt đầu bằng 03, 05, 07, 08 hoặc 09">
+                                            <div id="checkoutPhoneFeedback" style="display:none;"></div>
+                                            <small class="text-muted">Định dạng: 10 chữ số, đầu số nhà mạng VN (03, 05, 07, 08, 09)</small>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label small fw-bold">Email nhận hóa đơn</label>
-                                            <input type="email" id="inputEmail" name="email" class="form-control" value="${state.currentUser ? state.currentUser.email : ''}" placeholder="email@gmail.com">
+                                            <label class="form-label small fw-bold">Email nhận mã đơn</label>
+                                            <input type="email" name="email" class="form-control" value="${state.currentUser ? state.currentUser.email : ''}" placeholder="email@gmail.com">
                                         </div>
                                     </div>
+
+                                    <!-- ĐỊA CHỈ KHÁCH HÀNG TỰ NHẬP CHỮ TRỰC TIẾP -->
                                     <div class="mb-3">
                                         <label class="form-label small fw-bold">Địa chỉ nhận hàng chi tiết *</label>
-                                        <input type="text" id="inputAddress" name="address" class="form-control" required placeholder="Số nhà, tên đường, phường/xã, quận/huyện...">
+                                        <textarea name="address" class="form-control" rows="3" required placeholder="Ví dụ: Số 12, ngõ 86 đường Cầu Giấy, Phường Quan Hoa, Quận Cầu Giấy, Hà Nội"></textarea>
+                                        <small class="text-muted">
+                                            <i class="bi bi-info-circle me-1"></i> Khách hàng vui lòng nhập đầy đủ: <strong>Số nhà, tên đường/ngõ, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố</strong> để bưu tá giao chính xác.
+                                        </small>
                                     </div>
+
                                     <div class="mb-3">
-                                        <label class="form-label small fw-bold">Ghi chú độ cận hoặc lưu ý khi giao</label>
-                                        <textarea id="inputNote" name="note" class="form-control" rows="2" placeholder="Ví dụ: Mắt trái 1.5 độ, mắt phải 2.0 độ..."></textarea>
+                                        <label class="form-label small fw-bold">Ghi chú độ mắt cận / loạn (nếu có)</label>
+                                        <textarea name="note" class="form-control" rows="2" placeholder="Ví dụ: Cận mắt trái 2.0, mắt phải 1.75..."></textarea>
                                     </div>
-                                    <div class="p-3 bg-light rounded-3 mb-4">
-                                        <label class="form-label fw-bold mb-2">Hình thức thanh toán</label>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" id="paymentCod" checked>
-                                            <label class="form-check-label" for="paymentCod">Thanh toán khi nhận hàng (COD)</label>
+
+                                    <div class="card border-0 shadow-sm p-3 mb-4 bg-light">
+                                        <label class="form-label fw-bold mb-2"><i class="bi bi-credit-card-2-front me-2 text-primary"></i>Chọn hình thức thanh toán</label>
+                                        <div class="payment-box p-3 mb-2 bg-white active" id="box_COD" onclick="setPaymentMethod('COD')">
+                                            <div class="fw-bold"><i class="bi bi-cash-stack text-success me-1"></i> Thanh toán khi nhận hàng (COD)</div>
+                                            <small class="text-muted">Kiểm tra kính mắt rồi thanh toán tiền mặt trực tiếp cho bưu tá.</small>
                                         </div>
+                                        <div class="payment-box p-3 mb-2 bg-white" id="box_BANK" onclick="setPaymentMethod('BANK')">
+                                            <div class="fw-bold"><i class="bi bi-qr-code text-primary me-1"></i> Chuyển khoản VietQR (Ngân hàng 24/7)</div>
+                                            <small class="text-muted">Quét mã QR chuyển khoản nhanh qua App Ngân hàng.</small>
+                                        </div>
+                                        <div class="payment-box p-3 bg-white" id="box_MOMO" onclick="setPaymentMethod('MOMO')">
+                                            <div class="fw-bold"><i class="bi bi-wallet2 text-danger me-1"></i> Ví điện tử MoMo</div>
+                                            <small class="text-muted">Thanh toán liền mạch, bảo mật bằng ví MoMo.</small>
+                                        </div>
+                                        <div id="paymentExtraInfo"></div>
                                     </div>
-                                    <button id="btnSubmitOrder" type="submit" class="btn btn-warning btn-lg w-100 fw-bold">Xác nhận đặt hàng ngay</button>
+
+                                    <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold">
+                                        <i class="bi bi-lock-fill me-1"></i> Xác nhận & Hoàn tất đặt hàng
+                                    </button>
                                 </form>
                             </div>
+
                             <div class="col-md-5">
-                                <div class="card border-0 shadow-sm p-4">
-                                    <h5 class="fw-bold mb-3">Đơn hàng cần thanh toán</h5>
+                                <div class="card border-0 shadow-sm p-4 sticky-top" style="top: 80px;">
+                                    <h5 class="fw-bold mb-3">Đơn hàng của bạn</h5>
                                     <ul class="list-unstyled mb-3">
-                                        ${state.cart.map(i => `<li class="d-flex justify-content-between small mb-2"><span>${i.name} × ${i.quantity}</span><strong>${formatMoney(i.price * i.quantity)}</strong></li>`).join('')}
+                                        ${state.cart.map(i => `
+                                            <li class="d-flex justify-content-between small mb-2">
+                                                <span>${i.name} × ${i.quantity}</span>
+                                                <strong>${formatMoney(i.price * i.quantity)}</strong>
+                                            </li>
+                                        `).join('')}
                                     </ul>
                                     <hr>
                                     <div class="d-flex justify-content-between mb-2"><span>Tạm tính:</span><span>${formatMoney(subtotal)}</span></div>
-                                    ${discount > 0 ? `<div class="d-flex justify-content-between mb-2 text-success"><span>Giảm giá:</span><span>-${formatMoney(discount)}</span></div>` : ''}
-                                    <div class="d-flex justify-content-between mb-2"><span>Vận chuyển:</span><span>${formatMoney(shipping)}</span></div>
+                                    ${discount > 0 ? `<div class="d-flex justify-content-between mb-2 text-success"><span>Giảm giá (${state.appliedCoupon.code}):</span><span>-${formatMoney(discount)}</span></div>` : ''}
+                                    <div class="d-flex justify-content-between mb-2"><span>Phí vận chuyển:</span><span>${shipping === 0 ? '<span class="text-success fw-bold">Miễn phí</span>' : formatMoney(shipping)}</span></div>
                                     <hr>
-                                    <div class="d-flex justify-content-between"><span class="fw-bold fs-5">Tổng cộng:</span><span id="checkoutTotalAmount" class="fw-bold fs-5 text-danger">${formatMoney(total)}</span></div>
+                                    <div class="d-flex justify-content-between mb-2"><span class="fw-bold fs-5">Tổng thanh toán:</span><span class="fw-bold fs-5 text-danger">${formatMoney(total)}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -1036,24 +1572,32 @@
                 `;
             }
 
-            // 8. ĐẶT HÀNG THÀNH CÔNG
+            // 5. ĐẶT HÀNG THÀNH CÔNG
             else if (state.currentPage === 'order-success') {
+                const latestOrder = state.orders[0];
                 app.innerHTML = `
                     <div class="container text-center my-5 py-5">
-                        <div class="card border-0 shadow-sm p-5 mx-auto" style="max-width: 500px;">
+                        <div class="card border-0 shadow-sm p-5 mx-auto" style="max-width: 580px;">
                             <i class="bi bi-check-circle-fill text-success display-1"></i>
-                            <h3 class="fw-bold mt-4" id="successOrderTitle">Đặt hàng thành công!</h3>
-                            <p class="text-muted">Đơn hàng của bạn đã được ghi nhận. Bộ phận chăm sóc khách hàng của OptiLux sẽ sớm liên hệ xác nhận đơn kính của bạn.</p>
-                            <div class="d-flex justify-content-center gap-3 mt-4">
-                                <button id="btnContinueShopping" class="btn btn-outline-dark" onclick="navTo('products')">Tiếp tục mua hàng</button>
-                                <button id="btnViewHistoryOrders" class="btn btn-warning fw-bold" onclick="navTo('orders')">Xem đơn hàng</button>
+                            <h3 class="fw-bold mt-4">Đặt Hàng Thành Công!</h3>
+                            <p class="text-muted mb-2">Đơn hàng <strong>#${latestOrder ? latestOrder.id : ''}</strong> đã được ghi nhận vào cơ sở dữ liệu GLORISS.</p>
+                            ${latestOrder ? `
+                                <div class="bg-light text-start p-3 rounded small mb-4">
+                                    <div><strong>Người nhận:</strong> ${latestOrder.customer} - ${latestOrder.phone}</div>
+                                    <div><strong>Địa chỉ bưu tá giao:</strong> ${latestOrder.address}</div>
+                                    <div><strong>Tổng tiền thanh toán:</strong> <span class="text-danger fw-bold">${formatMoney(latestOrder.total)}</span> (${latestOrder.paymentMethod})</div>
+                                </div>
+                            ` : ''}
+                            <div class="d-flex justify-content-center gap-3">
+                                <button class="btn btn-outline-dark" onclick="navTo('home')">Tiếp tục mua sắm</button>
+                                <button class="btn btn-warning fw-bold" onclick="navTo('orders')">Xem đơn hàng</button>
                             </div>
                         </div>
                     </div>
                 `;
             }
 
-            // 9. LỊCH SỬ ĐƠN MUA
+            // 6. LỊCH SỬ ĐƠN HÀNG CỦA KHÁCH
             else if (state.currentPage === 'orders') {
                 const myOrders = (state.currentUser && state.currentUser.role !== 'admin')
                     ? state.orders.filter(o => o.email === state.currentUser.email || o.customer === state.currentUser.fullname)
@@ -1061,30 +1605,41 @@
 
                 app.innerHTML = `
                     <div class="container my-5">
-                        <h4 class="fw-bold mb-4"><i class="bi bi-box-seam"></i> Lịch sử đơn đặt mua</h4>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="fw-bold mb-0"><i class="bi bi-box-seam me-2 text-warning"></i> Đơn mua của bạn</h4>
+                            ${state.currentUser && state.currentUser.role === 'admin' ? `
+                                <button class="btn btn-outline-primary btn-sm" onclick="navTo('admin-dashboard')">
+                                    <i class="bi bi-speedometer2 me-1"></i>Đến Trang Quản trị Admin
+                                </button>
+                            ` : ''}
+                        </div>
                         <div class="card border-0 shadow-sm">
                             <div class="table-responsive">
-                                <table class="table align-middle mb-0" id="ordersTable">
+                                <table class="table align-middle mb-0">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Mã đơn</th>
                                             <th>Thời gian đặt</th>
                                             <th>Khách nhận</th>
+                                            <th>Địa chỉ giao hàng</th>
+                                            <th>Hình thức TT</th>
                                             <th>Tổng tiền</th>
-                                            <th>Trạng thái đơn</th>
+                                            <th>Trạng thái</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         ${myOrders.length > 0 ? myOrders.map(o => `
-                                            <tr id="orderRow_${o.id}">
-                                                <td class="fw-bold">#${o.id}</td>
-                                                <td>${o.createdAt}</td>
-                                                <td>${o.customer}</td>
+                                            <tr>
+                                                <td class="fw-bold text-primary">#${o.id}</td>
+                                                <td><small class="text-muted">${o.createdAt}</small></td>
+                                                <td><strong>${o.customer}</strong><br><small class="text-secondary">${o.phone}</small></td>
+                                                <td><small class="text-secondary">${o.address}</small></td>
+                                                <td><span class="badge bg-light text-dark border">${o.paymentMethod || 'COD'}</span></td>
                                                 <td class="fw-bold text-danger">${formatMoney(o.total)}</td>
-                                                <td><span class="badge bg-info text-dark">${o.status}</span></td>
+                                                <td><span class="badge status-badge ${getStatusBadgeClass(o.status)}">${o.status}</span></td>
                                             </tr>
                                         `).join('') : `
-                                            <tr><td colspan="5" class="text-center py-4 text-muted">Chưa có đơn hàng nào!</td></tr>
+                                            <tr><td colspan="7" class="text-center py-4 text-muted">Chưa có đơn hàng nào!</td></tr>
                                         `}
                                     </tbody>
                                 </table>
@@ -1094,75 +1649,174 @@
                 `;
             }
 
-            // 10. TRANG QUẢN TRỊ ADMIN
+            // 7. AUTH PAGES - ĐĂNG NHẬP / ĐĂNG KÝ
+            else if (state.currentPage === 'login') {
+                app.innerHTML = `
+                    <div class="container my-5">
+                        <div class="card auth-card border-0 shadow mx-auto p-4">
+                            <h3 class="fw-bold text-center mb-1">Đăng Nhập GLORISS</h3>
+                            <p class="text-center text-muted small mb-4">Nhập Họ tên hoặc Email để mua sắm & quản trị</p>
+                            <form onsubmit="handleLogin(event)">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Họ và tên hoặc Email</label>
+                                    <input type="text" name="login_id" class="form-control" required placeholder="admin@gloriss.vn hoặc Quản Trị Viên">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Mật khẩu</label>
+                                    <input type="password" name="password" class="form-control" required placeholder="Nhập mật khẩu...">
+                                </div>
+                                <button type="submit" class="btn btn-warning w-100 fw-bold py-2 mb-3">Đăng Nhập</button>
+                                <div class="text-center small">
+                                    Chưa có tài khoản? <a href="javascript:void(0)" class="fw-bold text-decoration-none" onclick="navTo('register')">Đăng ký ngay</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (state.currentPage === 'register') {
+                app.innerHTML = `
+                    <div class="container my-5">
+                        <div class="card auth-card border-0 shadow mx-auto p-4">
+                            <h3 class="fw-bold text-center mb-1">Tạo Tài Khoản Mới</h3>
+                            <p class="text-center text-muted small mb-4">Đăng ký thành viên GLORISS để nhận nhiều voucher ưu đãi</p>
+                            <form onsubmit="handleRegister(event)">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Họ và tên *</label>
+                                    <input type="text" name="fullname" class="form-control" required placeholder="Ví dụ: Trần Văn Nam">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Email *</label>
+                                    <input type="email" name="email" class="form-control" required placeholder="nam@gmail.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Số điện thoại di động *</label>
+                                    <input type="text" id="registerPhone" name="phone" class="form-control" required autocomplete="tel" placeholder="0912345678" oninput="handlePhoneRealtimeInput(this, 'registerPhoneFeedback')" onblur="handlePhoneRealtimeInput(this, 'registerPhoneFeedback', true)" title="Số điện thoại gồm 10 chữ số, bắt đầu bằng 03, 05, 07, 08 hoặc 09">
+                                    <div id="registerPhoneFeedback" style="display:none;"></div>
+                                    <small class="text-muted">Định dạng: 10 chữ số, đầu số nhà mạng VN (03, 05, 07, 08, 09)</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Mật khẩu *</label>
+                                    <input type="password" name="password" class="form-control" required placeholder="Tối thiểu 6 ký tự">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Xác nhận mật khẩu *</label>
+                                    <input type="password" name="confirm_password" class="form-control" required placeholder="Nhập lại mật khẩu trên">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mb-3">Đăng Ký</button>
+                                <div class="text-center small">
+                                    Đã có tài khoản? <a href="javascript:void(0)" class="fw-bold text-decoration-none" onclick="navTo('login')">Đăng nhập</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 8. TRANG ADMIN DASHBOARD (QUẢN LÝ KHO, SỬA GIÁ, THÊM/XÓA, ĐỔI ĐƠN & SQL LOG)
             else if (state.currentPage === 'admin-dashboard') {
-                const totalRevenue = state.orders.reduce((s, o) => s + o.total, 0);
+                const totalRevenue = state.orders.reduce((s, o) => s + (o.status !== 'Đã hủy' ? o.total : 0), 0);
+                const totalStock = state.products.reduce((s, p) => s + p.stock, 0);
 
                 app.innerHTML = `
                     <div class="container my-4">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
                             <div>
-                                <h3 class="fw-bold mb-0"><i class="bi bi-speedometer2"></i> Trung tâm Quản trị Admin</h3>
-                                <small class="text-muted">Đang quản trị bởi: <strong>${state.currentUser.fullname}</strong> (${state.currentUser.email})</small>
+                                <h3 class="fw-bold mb-0"><i class="bi bi-speedometer2 text-primary me-2"></i>Trung Tâm Quản Trị Hệ Thống GLORISS</h3>
+                                <small class="text-muted">Quản trị viên: <strong>${state.currentUser.fullname}</strong> (${state.currentUser.email})</small>
                             </div>
-                            <button id="btnOpenAddModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                                <i class="bi bi-plus-circle me-1"></i> Thêm kính mắt mới
-                            </button>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                                    <i class="bi bi-plus-circle me-1"></i> Thêm sản phẩm mới
+                                </button>
+                            </div>
                         </div>
 
+                        <!-- THỐNG KÊ TỔNG QUAN -->
                         <div class="row g-3 mb-4">
                             <div class="col-md-3">
                                 <div class="card border-0 shadow-sm bg-primary text-white p-3">
-                                    <h6 class="small text-uppercase">TỔNG DOANH THU</h6>
-                                    <h4 class="fw-bold mb-0" id="adminRevenue">${formatMoney(totalRevenue)}</h4>
+                                    <h6 class="small text-uppercase">DOANH THU THỰC TẾ</h6>
+                                    <h4 class="fw-bold mb-0">${formatMoney(totalRevenue)}</h4>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="card border-0 shadow-sm bg-success text-white p-3">
                                     <h6 class="small text-uppercase">TỔNG ĐƠN HÀNG</h6>
-                                    <h4 class="fw-bold mb-0" id="adminOrderCount">${state.orders.length}</h4>
+                                    <h4 class="fw-bold mb-0">${state.orders.length} đơn</h4>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="card border-0 shadow-sm bg-warning text-dark p-3">
-                                    <h6 class="small text-uppercase">SẢN PHẨM TRONG KHO</h6>
-                                    <h4 class="fw-bold mb-0" id="adminProductCount">${state.products.length}</h4>
+                                    <h6 class="small text-uppercase">TỔNG TỒN KHO</h6>
+                                    <h4 class="fw-bold mb-0">${totalStock} chiếc</h4>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="card border-0 shadow-sm bg-info text-dark p-3">
-                                    <h6 class="small text-uppercase">TỔNG THÀNH VIÊN</h6>
-                                    <h4 class="fw-bold mb-0" id="adminUserCount">${state.users.length}</h4>
+                                    <h6 class="small text-uppercase">MẪU KÍNH ĐANG BÁN</h6>
+                                    <h4 class="fw-bold mb-0">${state.products.length} mẫu</h4>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- SQL TERMINAL CONSOLE LOG (GIẢ LẬP TRUY VẤN SQL THỰC TẾ) -->
                         <div class="card border-0 shadow-sm mb-4">
-                            <div class="card-header bg-white py-3 fw-bold">Danh sách kho kính mắt</div>
+                            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2">
+                                <span class="small fw-bold"><i class="bi bi-terminal me-2 text-warning"></i>Nhật Ký Giao Dịch SQL (SQL Real-time Engine Log)</span>
+                                <span class="badge bg-secondary" style="font-size:0.7rem;">InnoDB Transactions</span>
+                            </div>
+                            <div class="card-body p-2 bg-dark">
+                                <div class="sql-terminal p-2" id="sqlTerminalView">
+                                    ${state.sqlLogs.map(l => `<div>${escapeHtml(l)}</div>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- QUẢN LÝ KHO VÀ GIÁ SẢN PHẨM (ADMIN CÓ THỂ SỬA KHO, GIÁ, THÊM, XÓA) -->
+                        <div class="card border-0 shadow-sm mb-4 border-top border-4 border-primary">
+                            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold mb-0"><i class="bi bi-boxes me-2 text-primary"></i>Quản lý hàng tồn kho & Giá bán (${state.products.length} sản phẩm)</h5>
+                                <span class="badge bg-primary">Admin Controls</span>
+                            </div>
                             <div class="table-responsive">
-                                <table class="table align-middle mb-0" id="adminProductTable">
+                                <table class="table align-middle mb-0">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Ảnh</th>
                                             <th>Mã SKU</th>
-                                            <th>Tên kính</th>
+                                            <th>Tên sản phẩm</th>
                                             <th>Danh mục</th>
-                                            <th>Giá bán</th>
+                                            <th>Giá niêm yết</th>
+                                            <th>Giá sale</th>
                                             <th>Tồn kho</th>
-                                            <th>Thao tác</th>
+                                            <th style="min-width: 170px;">Thao tác quản trị</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         ${state.products.map(p => `
-                                            <tr id="adminRow_${p.id}">
-                                                <td><img src="${p.image}" width="45" height="45" class="rounded object-fit-cover"></td>
+                                            <tr>
+                                                <td><img src="${p.image}" onerror="handleImgError(this, '${p.image}', ${p.id}, '${p.name.replace(/'/g, "\'")}')" width="45" height="45" class="rounded object-fit-cover"></td>
                                                 <td><code>${p.sku}</code></td>
-                                                <td class="fw-bold">${p.name}</td>
-                                                <td>${p.category}</td>
+                                                <td class="fw-bold">
+                                                    ${p.name}
+                                                    ${(p.sale_price || p.price) >= 1000000 ? `<span class="badge badge-premium ms-1" style="font-size:0.65rem;">Cao cấp</span>` : ''}
+                                                </td>
+                                                <td><span class="badge bg-light text-dark border">${p.category}</span></td>
                                                 <td>${formatMoney(p.price)}</td>
-                                                <td>${p.stock}</td>
+                                                <td>${p.sale_price ? `<span class="text-danger fw-bold">${formatMoney(p.sale_price)}</span>` : '<span class="text-muted">-</span>'}</td>
                                                 <td>
-                                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteProduct(${p.id})"><i class="bi bi-trash"></i> Xóa</button>
+                                                    <span class="badge ${p.stock > 10 ? 'bg-success' : (p.stock > 0 ? 'bg-warning text-dark' : 'bg-danger')}">
+                                                        ${p.stock} chiếc
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-outline-primary btn-sm me-1" onclick="openEditProductModal(${p.id})" title="Chỉnh sửa tồn kho và giá">
+                                                        <i class="bi bi-pencil-square"></i> Sửa kho & Giá
+                                                    </button>
+                                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteProduct(${p.id})" title="Xóa khỏi hệ thống">
+                                                        <i class="bi bi-trash"></i> Xóa
+                                                    </button>
                                                 </td>
                                             </tr>
                                         `).join('')}
@@ -1171,32 +1825,49 @@
                             </div>
                         </div>
 
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-white py-3 fw-bold">Quản lý và chuyển trạng thái đơn hàng</div>
+                        <!-- QUẢN LÝ ĐƠN HÀNG VÀ TRẠNG THÁI GIAO HÀNG -->
+                        <div class="card border-0 shadow-sm mb-4 border-top border-4 border-warning">
+                            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold mb-0"><i class="bi bi-card-checklist me-2 text-warning"></i>Quản lý đơn hàng & Xác nhận giao vận</h5>
+                                <span class="badge bg-dark">${state.orders.length} Đơn hàng</span>
+                            </div>
                             <div class="table-responsive">
-                                <table class="table align-middle mb-0" id="adminOrderTable">
+                                <table class="table align-middle mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Mã đơn</th>
-                                            <th>Người nhận</th>
-                                            <th>Địa chỉ nhận</th>
+                                            <th>Mã</th>
+                                            <th>Khách hàng</th>
+                                            <th>Địa chỉ nhận hàng (Khách tự nhập)</th>
                                             <th>Tổng tiền</th>
-                                            <th>Cập nhật trạng thái</th>
+                                            <th>Trạng thái hiện tại</th>
+                                            <th style="min-width: 200px;">Đổi trạng thái</th>
+                                            <th>Chi tiết</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         ${state.orders.map(o => `
-                                            <tr id="adminOrderRow_${o.id}">
-                                                <td class="fw-bold">#${o.id}</td>
-                                                <td>${o.customer}<br><small class="text-muted">${o.phone}</small></td>
-                                                <td><small>${o.address}</small></td>
+                                            <tr>
+                                                <td class="fw-bold text-primary">#${o.id}</td>
+                                                <td>
+                                                    <strong>${o.customer}</strong><br>
+                                                    <small class="text-muted"><i class="bi bi-telephone"></i> ${o.phone}</small>
+                                                </td>
+                                                <td><small class="text-secondary">${o.address}</small></td>
                                                 <td class="fw-bold text-danger">${formatMoney(o.total)}</td>
                                                 <td>
-                                                    <select class="form-select form-select-sm" style="width: 170px;" onchange="updateOrderStatus(${o.id}, this.value)">
+                                                    <span class="badge status-badge ${getStatusBadgeClass(o.status)}">${o.status}</span>
+                                                </td>
+                                                <td>
+                                                    <select class="form-select form-select-sm" onchange="updateOrderStatus(${o.id}, this.value)">
                                                         ${['Chờ xác nhận', 'Đã xác nhận', 'Đang chuẩn bị', 'Đang giao', 'Đã giao', 'Đã hủy'].map(st => `
-                                                            <option value="${st}" ${o.status===st?'selected':''}>${st}</option>
+                                                            <option value="${st}" ${o.status===st ? 'selected' : ''}>${st}</option>
                                                         `).join('')}
                                                     </select>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-secondary" onclick="openEditStatusModal(${o.id})" title="Xem chi tiết đơn hàng">
+                                                        <i class="bi bi-eye"></i> Xem
+                                                    </button>
                                                 </td>
                                             </tr>
                                         `).join('')}
@@ -1206,81 +1877,81 @@
                         </div>
                     </div>
 
-                    <!-- Modal Thêm sản phẩm -->
+                    <!-- MODAL THÊM SẢN PHẨM MỚI -->
                     <div class="modal fade" id="addProductModal" tabindex="-1">
                         <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <form id="addProductForm" onsubmit="handleCreateProduct(event)">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title fw-bold">Thêm kính mắt mới vào kho</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            <div class="modal-content shadow border-0">
+                                <form onsubmit="handleCreateProduct(event)">
+                                    <div class="modal-header bg-dark text-white">
+                                        <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle text-warning me-2"></i>Thêm Kính Mắt Mới Vào Kho GLORISS</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                     </div>
-                                    <div class="modal-body row g-3">
+                                    <div class="modal-body row g-3 p-4">
                                         <div class="col-md-8">
-                                            <label class="form-label small fw-bold">Tên sản phẩm *</label>
-                                            <input type="text" id="adminInputName" name="name" class="form-control" required placeholder="Kính Cận Ray-Ban...">
+                                            <label class="form-label small fw-bold">Tên sản phẩm kính *</label>
+                                            <input type="text" name="name" class="form-control" required placeholder="Gọng Kính Cận Titan Cao Cấp GLORISS...">
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label small fw-bold">Mã SKU *</label>
-                                            <input type="text" id="adminInputSku" name="sku" class="form-control" required placeholder="OPT-09">
+                                            <input type="text" name="sku" class="form-control" required placeholder="GLR-9999">
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label small fw-bold">Danh mục</label>
-                                            <select id="adminSelectCategory" name="category" class="form-select">
+                                            <select name="category" class="form-select">
                                                 <option value="Kính cận">Kính cận</option>
                                                 <option value="Kính râm">Kính râm</option>
                                                 <option value="Kính thời trang">Kính thời trang</option>
                                             </select>
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label small fw-bold">Hãng</label>
-                                            <input type="text" id="adminInputBrand" name="brand" class="form-control" required placeholder="Ray-Ban, Oakley...">
+                                            <label class="form-label small fw-bold">Thương hiệu</label>
+                                            <input type="text" name="brand" class="form-control" required value="GLORISS">
                                         </div>
                                         <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Số lượng nhập kho ban đầu *</label>
+                                            <input type="number" name="stock" value="20" min="1" class="form-control" required>
+                                        </div>
+                                        <div class="col-md-6">
                                             <label class="form-label small fw-bold">Giá niêm yết (VNĐ) *</label>
-                                            <input type="number" id="adminInputPrice" name="price" class="form-control" required placeholder="800000">
+                                            <input type="number" name="price" class="form-control" required placeholder="1250000" min="1000">
                                         </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label small fw-bold">Giá khuyến mãi</label>
-                                            <input type="number" id="adminInputSalePrice" name="sale_price" class="form-control" placeholder="Để trống nếu không giảm">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label small fw-bold">Số lượng tồn kho</label>
-                                            <input type="number" id="adminInputStock" name="stock" value="15" class="form-control">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Giá khuyến mãi (VNĐ)</label>
+                                            <input type="number" name="sale_price" class="form-control" placeholder="Để trống nếu không giảm giá">
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label small fw-bold">Kiểu dáng</label>
-                                            <select id="adminSelectShape" name="shape" class="form-select">
+                                            <select name="shape" class="form-select">
                                                 <option value="Vuông">Vuông</option>
                                                 <option value="Tròn">Tròn</option>
                                                 <option value="Phi công">Phi công</option>
                                                 <option value="Mắt mèo">Mắt mèo</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <label class="form-label small fw-bold">Giới tính</label>
-                                            <select id="adminSelectGender" name="gender" class="form-select">
+                                            <select name="gender" class="form-select">
                                                 <option value="Unisex">Unisex</option>
                                                 <option value="Nam">Nam</option>
                                                 <option value="Nữ">Nữ</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label small fw-bold">Chất liệu</label>
-                                            <input type="text" id="adminInputMaterial" name="material" value="Titanium" class="form-control">
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold">Chất liệu gọng</label>
+                                            <input type="text" name="material" value="Titanium" class="form-control">
                                         </div>
                                         <div class="col-12">
-                                            <label class="form-label small fw-bold">Link ảnh sản phẩm (URL)</label>
-                                            <input type="url" id="adminInputImage" name="image" class="form-control" value="https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600">
+                                            <label class="form-label small fw-bold">Tên tệp hình ảnh</label>
+                                            <input type="text" name="image" class="form-control" value="605534053_1176777201319095_4701404897652910712_n.jpg">
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label small fw-bold">Mô tả sản phẩm</label>
-                                            <textarea id="adminInputDescription" name="description" class="form-control" rows="2"></textarea>
+                                            <textarea name="description" class="form-control" rows="2" placeholder="Gọng kính chính hãng bền nhẹ, tôn dáng khuôn mặt..."></textarea>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                        <button id="btnAdminSaveProduct" type="submit" class="btn btn-primary fw-bold">Lưu vào kho hàng</button>
+                                        <button type="submit" class="btn btn-primary fw-bold"><i class="bi bi-save me-1"></i>Lưu vào kho hàng</button>
                                     </div>
                                 </form>
                             </div>
@@ -1290,15 +1961,24 @@
             }
         }
 
-        function renderProductCard(p, colClass = 'col-md-3') {
+        function renderProductCard(p, colClass = 'col-md-4') {
+            const isPremium = (p.sale_price || p.price) >= 1000000;
             return `
-                <div class="${colClass}" id="productItem_${p.id}">
+                <div class="${colClass}">
                     <div class="card h-100 product-card shadow-sm border-0">
-                        <img src="${p.image}" class="card-img-top product-img" alt="${p.name}">
+                        <img src="${p.image}" onerror="handleImgError(this, '${p.image}', ${p.id}, '${p.name.replace(/'/g, "\'")}')" class="card-img-top product-img" alt="${p.name}">
                         <div class="card-body d-flex flex-column">
-                            <span class="badge bg-light text-dark mb-2 align-self-start border">${p.brand}</span>
-                            <h6 class="card-title fw-bold text-truncate cursor-pointer" onclick="navTo('detail', ${p.id})">${p.name}</h6>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-light text-dark border">${p.brand}</span>
+                                ${isPremium ? `<span class="badge badge-premium"><i class="bi bi-gem"></i> Cao Cấp</span>` : `<small class="text-muted fw-bold">#${p.id}</small>`}
+                            </div>
+                            <h6 class="card-title fw-bold text-truncate cursor-pointer" onclick="navTo('detail', ${p.id})" title="${p.name}">${p.name}</h6>
                             <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="${p.stock > 0 ? 'text-success' : 'text-danger'} fw-semibold">
+                                        ${p.stock > 0 ? `<i class="bi bi-check-circle"></i> Còn ${p.stock}` : '<i class="bi bi-x-circle"></i> Hết hàng'}
+                                    </small>
+                                </div>
                                 <div class="mb-3">
                                     ${p.sale_price ? `
                                         <span class="text-danger fw-bold fs-5">${formatMoney(p.sale_price)}</span>
@@ -1306,8 +1986,8 @@
                                     ` : `<span class="text-primary fw-bold fs-5">${formatMoney(p.price)}</span>`}
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <button class="btn btn-outline-dark btn-sm flex-grow-1 btn-detail" onclick="navTo('detail', ${p.id})">Chi tiết</button>
-                                    <button class="btn btn-warning btn-sm btn-quick-add" onclick="addToCart(${p.id}, 1)" title="Thêm vào giỏ"><i class="bi bi-cart-plus"></i></button>
+                                    <button class="btn btn-outline-dark btn-sm flex-grow-1" onclick="navTo('detail', ${p.id})">Chi tiết</button>
+                                    <button class="btn btn-warning btn-sm" onclick="addToCart(${p.id}, 1)" title="Thêm vào giỏ" ${p.stock <= 0 ? 'disabled' : ''}><i class="bi bi-cart-plus"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -1316,7 +1996,7 @@
             `;
         }
 
-        // INIT
+        // KHỞI ĐỘNG HỆ THỐNG BAN ĐẦU
         updateCartBadge();
         renderAuthNav();
         render();
